@@ -1,0 +1,24 @@
+{
+  "name": "voice-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/project-voice/voice-node.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/project-voice/voice-node/issues"
+  },
+  "homepage": "https://github.com/project-voice/voice-node#readme",
+  "dependencies": {
+    "kever": "^0.4.8",
+    "typescript": "^3.7.5"
+  }
+}
