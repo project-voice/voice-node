@@ -9,7 +9,7 @@ export default class Redis implements BaseMiddle {
   private RDS_PORT = 6379
   private RDS_HOST = '39.105.106.168'
   private RDS_OPTS = {}
-  private client
+  public client
   constructor() {
     const client = redis.createClient(this.RDS_PORT, this.RDS_HOST, this.RDS_OPTS)
     client.on('connect', err => {
