@@ -1,19 +1,10 @@
 import { registerGlobalMiddle, BaseMiddle } from 'kever'
 import * as mysql from 'mysql2/promise'
-import bluebird from 'bluebird'
-
+import { mysql as mysqlConfig } from '../app/config'
 @registerGlobalMiddle('db')
 export default class DB implements BaseMiddle {
-  private baseInfo
   private mysql
   constructor() {
-    this.baseInfo = {
-      host: '39.105.106.168',
-      user: 'root',
-      password: 'goaway0806',
-      database: 'voice',
-      Promise: bluebird
-    }
     this.initMysql()
       .then(mysql => {
         this.mysql = mysql
@@ -24,7 +15,7 @@ export default class DB implements BaseMiddle {
       })
   }
   async initMysql() {
-    const connection = await mysql.createConnection(this.baseInfo)
+    const connection = await mysql.createConnection(mysqlConfig)
     return connection
   }
   async ready(ctx, next) {
