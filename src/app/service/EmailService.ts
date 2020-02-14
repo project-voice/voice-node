@@ -16,18 +16,18 @@ export default class EmailService implements EmailInterface {
     const transporter = nodemailer.createTransport(config)
     this.transporter = transporter
   }
-  async sendEmail(address: string, redis: any): Promise<Object> {
+  async sendEmail(userEmail: string, redis: any): Promise<Object> {
     try {
       const sendMessage = email.message
       const identity = createIdentity(6)
-      sendMessage.to = address
+      sendMessage.to = userEmail
       sendMessage.html = `<p>Hi， 你的激活验证码为${identity}</p>
         <p>验证码半小时有效，请妥善保管。</p>`
 
       const info = await this.transporter.sendMail(sendMessage)
       // 验证码存入redis,半小时失效
-      redis.set(address, identity, redis.print)
-      redis.expire(address, 10 * 60 * 30)
+      redis.set(userEmail, identity, redis.print)
+      redis.expire(userEmail, 10 * 60 * 30)
 
       return Object.assign({}, this.data, {
         message: 'success',
@@ -40,9 +40,9 @@ export default class EmailService implements EmailInterface {
       })
     }
   }
-  checkIdentity(address: string, identity: string, redis: any): Promise<Object> {
+  checkIdentity(userEmail: string, identity: string, redis: any): Promise<Object> {
     return new Promise((resolve, reject) => {
-      redis.get(address, (err, data) => {
+      redis.get(userEmail, (err, data) => {
         if (err) {
           reject(
             Object.assign({}, this.data, {
