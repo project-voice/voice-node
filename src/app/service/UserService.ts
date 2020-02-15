@@ -75,11 +75,10 @@ export default class UserService implements UserInterface {
    * @param password
    * @param db
    */
-  async forgetPassword(userid: number, password: string, db: any): Promise<Object> {
+  async updateInfo(userid: number, key: string, value: string, db: any): Promise<Object> {
     try {
-      const updateSentence = 'update `user` set `user_password` = ? where `user_id` = ?'
-      const [rows, fields] = await db.query(updateSentence, [password, userid])
-      console.log(rows)
+      const updateSentence = `update user set ${key} = ? where user_id = ?`
+      const [rows, fields] = await db.query(updateSentence, [value, userid])
       if (rows.affectedRows) {
         return Object.assign({}, this.data, {
           message: '修改成功'

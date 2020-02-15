@@ -24,11 +24,11 @@ export default class UserController extends BaseController {
       this.ctx.body = { noerr: 1 }
     }
   }
-  @Post('/forget-password')
-  async forgetPassword(@Params(['body']) params) {
+  @Post('/update-info')
+  async updateInfo(@Params(['body']) params) {
     try {
-      const { user_id: userid, user_password: password } = params
-      const result = await this.userService.forgetPassword(userid, password, this.ctx.db)
+      const { user_id: userid, key, value } = params
+      const result = await this.userService.updateInfo(userid, key, value, this.ctx.db)
       this.ctx.body = result
     } catch (err) {
       this.ctx.body = { noerr: 1 }

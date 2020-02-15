@@ -6,6 +6,6 @@ interface EmailInterface {
 interface UserInterface {
   register(params: unknown, db: any): Promise<unknown>
   login(username: string, email: string, password: string, db: any): Promise<unknown>
-  forgetPassword(userid: number, password: string, db: any): Promise<unknown>
+  updateInfo(userid: number, key: string, value: string, db: any): Promise<unknown>
 }
 export { EmailInterface, UserInterface }
