@@ -2,10 +2,10 @@ import { Injectable } from 'kever'
 import * as nodemailer from 'nodemailer'
 import { email } from '../config/index'
 import { createIdentity } from '../utils'
-import { EmailInterface } from '../interface'
+import { EmailInterface, ResultData } from '../interface'
 @Injectable('email')
 export default class EmailService implements EmailInterface {
-  private data = {
+  private data: ResultData = {
     noerr: 0,
     message: '',
     data: null
@@ -16,7 +16,7 @@ export default class EmailService implements EmailInterface {
     const transporter = nodemailer.createTransport(config)
     this.transporter = transporter
   }
-  async sendEmail(userEmail: string, redis: any): Promise<Object> {
+  async sendEmail(userEmail: string, redis: any): Promise<ResultData> {
     try {
       const sendMessage = email.message
       const identity = createIdentity(6)
@@ -40,7 +40,7 @@ export default class EmailService implements EmailInterface {
       })
     }
   }
-  checkIdentity(userEmail: string, identity: string, redis: any): Promise<Object> {
+  checkIdentity(userEmail: string, identity: string, redis: any): Promise<ResultData> {
     return new Promise((resolve, reject) => {
       redis.get(userEmail, (err, data) => {
         if (err) {

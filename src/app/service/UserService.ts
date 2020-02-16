@@ -1,9 +1,9 @@
 import { Injectable } from 'kever'
-import { UserInterface } from '../interface'
+import { UserInterface, ResultData } from '../interface'
 
 @Injectable('user')
 export default class UserService implements UserInterface {
-  private data = {
+  private data: ResultData = {
     noerr: 0,
     message: '',
     data: null
@@ -13,7 +13,7 @@ export default class UserService implements UserInterface {
    * @param params
    * @param db
    */
-  async register(params: any, db: any): Promise<Object> {
+  async register(params: any, db: any): Promise<ResultData> {
     try {
       const { user_name: username, user_password: password, user_email: email } = params
       const createTime = Date.now()
@@ -38,7 +38,7 @@ export default class UserService implements UserInterface {
    * @param password
    * @param db
    */
-  async login(username: string, email: string, password: string, db: any): Promise<Object> {
+  async login(username: string, email: string, password: string, db: any): Promise<ResultData> {
     try {
       let querySentence: string
       let key: string
@@ -75,7 +75,7 @@ export default class UserService implements UserInterface {
    * @param password
    * @param db
    */
-  async updateInfo(userid: number, key: string, value: string, db: any): Promise<Object> {
+  async updateInfo(userid: number, key: string, value: string, db: any): Promise<ResultData> {
     try {
       const updateSentence = `update user set ${key} = ? where user_id = ?`
       const [rows, fields] = await db.query(updateSentence, [value, userid])
