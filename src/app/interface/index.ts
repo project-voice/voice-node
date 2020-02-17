@@ -57,32 +57,39 @@ export interface UserInterface {
 export interface TopicInterface {
   /**
    * 获取所有主题的发文
+   * @param actionUserid 
    * @param page 
    * @param count 
    */
-  getTopicAll(page: number, count: number, db: any): Promise<ResultData>
+  getTopicAll(actionUserid: number, page: number, count: number, db: any): Promise<ResultData>
   /**
    * 获取特定主题的发文
+   * @param actionUserid
    * @param type 
    * @param page 
    * @param count 
    */
-  getTopic(typeid: number, page: number, count: number, db: any): Promise<ResultData>
+  getTopic(actionUserid: number, topicType: string, page: number, count: number, db: any): Promise<ResultData>
   /**
    * 点赞
-   * @param typeid 
    * @param topicid 
    * @param userid 
    */
-  support(typeid: number, topicid: number, userid: number, db: any): Promise<ResultData>
+  support(topicid: number, userid: number, db: any): Promise<ResultData>
   /**
    * 评论
-   * @param typeid 
+   * @param releaseid 
    * @param topicid 
    * @param userid 
    * @param commentContent 
    */
-  comment(typeid: number, topicid: number, userid: number, commentContent: string, db: any): Promise<ResultData>
+  comment(releaseid: number, topicid: number, userid: number, commentContent: string, db: any): Promise<ResultData>
+  /**
+   * 获取评论列表
+   * @param topicid 
+   * @param db 
+   */
+  getCommentList(topicid: number, db: any): Promise<ResultData>
   /**
    * 发布主题
    * @param userid 

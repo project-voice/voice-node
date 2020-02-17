@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/project-voice/voice-node#readme",
   "dependencies": {
+    "ali-oss": "^6.5.1",
     "bluebird": "^3.7.2",
     "kever": "^0.4.9",
     "mysql2": "^2.1.0",

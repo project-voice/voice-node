@@ -20,11 +20,11 @@ export default class UserService implements UserInterface {
       const insertSentence = `insert into user(user_name,user_password,user_email,create_time) values(?,?,?,?)`
       const [rows, fields] = await db.query(insertSentence, [username, password, email, createTime])
       console.log('result:', rows, fields)
-      return Object.assign(this.data, {
+      return Object.assign({}, this.data, {
         message: '注册成功'
       })
     } catch (err) {
-      return Object.assign(this.data, {
+      return Object.assign({}, this.data, {
         noerr: 1,
         message: '注册失败',
         data: err
