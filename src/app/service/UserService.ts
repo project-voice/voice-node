@@ -83,7 +83,6 @@ export default class UserService implements UserInterface {
         filesPath = await uploadOss('user', [value as File])
         value = filesPath[0]
       }
-      console.log('value', value)
       const updateSentence = `update user set ${key} = ? where user_id = ?`
       const [rows, fields] = await db.query(updateSentence, [value, userid])
       if (rows.affectedRows) {
@@ -91,15 +90,65 @@ export default class UserService implements UserInterface {
           message: '修改成功'
         })
       } else {
-        return Object.assign({}, this.data, {
-          noerr: 1,
-          message: '修改失败'
-        })
+        throw new Error();
       }
     } catch (err) {
       return Object.assign({}, this.data, {
         noerr: 1,
         message: '修改失败',
+        data: err
+      })
+    }
+  }
+  async follow(userid: number, followid: number, db: any): Promise<ResultData> {
+    try {
+      const insertFollowSentence = `insert into follow(user_id,followuser_id) values(?,?)`
+      const [rows, fields] = await db.query(insertFollowSentence, [userid, followid])
+      if (rows.affectedRows == 1) {
+        return Object.assign({}, this.data, {
+          message: '关注成功'
+        })
+      } else {
+        throw new Error();
+      }
+    } catch (err) {
+      return Object.assign({}, this.data, {
+        noerr: 1,
+        message: '关注失败',
+        data: err
+      })
+    }
+  }
+  async getFollowList(userid: number, db: any): Promise<ResultData> {
+    try {
+      const selectFollowSentence = `select followuser_id from follow where user_id = ?`
+      const [rows, fields] = await db.query(selectFollowSentence, [userid])
+      const followList: Array<number> = rows.reduce((list, item) => list.concat([item.followuser_id]), [])
+      const usersPromise = followList.map(userid => this.getUser(userid, db))
+      const usersInfo = await Promise.all(usersPromise)
+      return Object.assign({}, this.data, {
+        message: '获取列表成功',
+        data: usersInfo.map(user => user.data)
+      })
+    } catch (err) {
+      return Object.assign({}, this.data, {
+        noerr: 1,
+        message: '获取列表失败',
+        data: err
+      })
+    }
+  }
+  async getUser(userid: number, db: any): Promise<ResultData> {
+    try {
+      const selectUserSentence = `select * from user where user_id = ?`
+      const [rows, fileds] = await db.query(selectUserSentence, [userid])
+      return Object.assign({}, this.data, {
+        data: rows
+      })
+    } catch (err) {
+      return Object.assign({}, this.data, {
+        noerr: 1,
+        message: '获取用户信息失败',
         data: err
       })
     }

@@ -49,6 +49,19 @@ export interface UserInterface {
    * @param db 
    */
   updateInfo(userid: number, key: string, value: string, db: any): Promise<ResultData>
+  /**
+   * 关注
+   * @param userid 
+   * @param followid 
+   * @param db 
+   */
+  follow(userid: number, followid: number, db: any): Promise<ResultData>
+  /**
+   * 获取用户关注列表
+   * @param userid 
+   * @param db 
+   */
+  getFollowList(userid: number, db: any): Promise<ResultData>
 }
 
 /**
@@ -87,9 +100,11 @@ export interface TopicInterface {
   /**
    * 获取评论列表
    * @param topicid 
+   * @param page 
+   * @param count 
    * @param db 
    */
-  getCommentList(topicid: number, db: any): Promise<ResultData>
+  getCommentList(topicid: number, page: number, count: number, db: any): Promise<ResultData>
   /**
    * 发布主题
    * @param userid 
@@ -103,6 +118,55 @@ export interface TopicInterface {
 /**
  * 短视频相关接口service约束
  */
-export interface VideoInterface { }
+export interface VideoInterface {
+  /**
+   * 获取第一页关注和推荐的视频列表
+   * @param userid 
+   * @param count 
+   * @param db 
+   */
+  getVideoListAll(userid: number, count: number, db: any): Promise<ResultData>
+  /**
+   * 获取某个的视频列表，分页
+   * @param userid 
+   * @param count 
+   * @param page 
+   * @param type 
+   * @param db 
+   */
+  getVideoList(userid: number, count: number, page: number, type: string, db: any): Promise<ResultData>
+  /**
+   * 点赞
+   * @param userid 
+   * @param videoid 
+   * @param db 
+   */
+  support(userid: number, videoid: number, db: any): Promise<ResultData>
+  /**
+   * 发布视频
+   * @param userid 
+   * @param description 
+   * @param video 
+   * @param db 
+   */
+  releaseVideo(userid: number, description: string, video: File, db: any): Promise<ResultData>
+  /**
+   * 评论
+   * @param releaseid 
+   * @param userid 
+   * @param videoid 
+   * @param commentContent 
+   * @param db 
+   */
+  comment(releaseid: number, userid: number, videoid: number, commentContent: string, db: any): Promise<ResultData>
+  /**
+   * 获取评论列表，分页
+   * @param videoid 
+   * @param page 
+   * @param count 
+   * @param db 
+   */
+  getCommentList(videoid: number, page: number, count: number, db: any): Promise<ResultData>
+}
 
 

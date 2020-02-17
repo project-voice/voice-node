@@ -179,11 +179,13 @@ export default class TopicService implements TopicInterface {
       })
     }
   }
-  async getCommentList(topicid: number, db): Promise<ResultData> {
+  async getCommentList(topicid: number, page: number, count: number, db): Promise<ResultData> {
     try {
       const selectCommentSentence = `select * from comment where topic_id = ?`
-      const [rows, fileds] = await db.query(selectCommentSentence, [topicid])
+      let [rows, fileds] = await db.query(selectCommentSentence, [topicid])
       rows.sort((a, b) => b.create_time - a.create_time)
+      // 分页
+      rows = rows.slice((page - 1) * count, page * count);
       for (let comment of rows) {
         const releaseid = comment.release_id
         const userid = comment.user_id

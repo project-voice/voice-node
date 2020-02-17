@@ -6,37 +6,35 @@ export default class UserController extends BaseController {
   private userService
   @Post('/register')
   async register(@Params(['body']) params) {
-    try {
-      const result = await this.userService.register(params, this.ctx.db)
-      this.ctx.body = result
-    } catch (err) {
-      this.ctx.body = { noerr: 1 }
-    }
+    const result = await this.userService.register(params, this.ctx.db)
+    this.ctx.body = result
   }
   @Post('/login')
   async login(@Params(['body']) params) {
-    try {
-      const { user_name: username, user_password: password, user_email: email } = params
-
-      const result = await this.userService.login(username, email, password, this.ctx.db)
-      this.ctx.body = result
-    } catch (err) {
-      this.ctx.body = { noerr: 1 }
-    }
+    const { user_name: username, user_password: password, user_email: email } = params
+    const result = await this.userService.login(username, email, password, this.ctx.db)
+    this.ctx.body = result
   }
   @Post('/update-info')
   async updateInfo(@Params(['body']) params) {
-    try {
-      let { user_id: userid, key, value } = params
-      if (key === 'user_image') {
-        const request = this.ctx.request as any;
-        value = request.files['value'];
-      }
-      console.log(key, value)
-      const result = await this.userService.updateInfo(userid, key, value, this.ctx.db)
-      this.ctx.body = result
-    } catch (err) {
-      this.ctx.body = { noerr: 1 }
+    let { user_id: userid, key, value } = params
+    if (key === 'user_image') {
+      const request = this.ctx.request as any;
+      value = request.files['value'];
     }
+    const result = await this.userService.updateInfo(userid, key, value, this.ctx.db)
+    this.ctx.body = result
+  }
+  @Get('/follow')
+  async follow(@Params(['query']) params) {
+    const { user_id: userid, follow_id: followid } = params
+    const result = await this.userService.follow(userid, followid, this.ctx.db)
+    this.ctx.body = result
+  }
+  @Get('/follow-list')
+  async getFollowList(@Params(['query']) params) {
+    const { user_id: userid } = params
+    const result = await this.userService.getFollowList(userid, this.ctx.db)
+    this.ctx.body = result
   }
 }
