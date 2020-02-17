@@ -122,6 +122,12 @@ export interface VideoInterface {
    * @param db 
    */
   getVideoListRecommend(userid: number, count: number, page: number, db: any): Promise<ResultData>
+  /**
+   * 分享
+   * @param videoid 
+   * @param db 
+   */
+  share(videoid: number, db: any): Promise<ResultData>
 }
 
 export interface SupportInterface {
@@ -155,4 +161,10 @@ export interface CommentInterface {
    * @param db 
    */
   getCommentList(topicid: number, commentType: number, page: number, count: number, db: any): Promise<ResultData>
+  /**
+   * 评论删除
+   * @param commentid 
+   * @param db 
+   */
+  deleteComment(commentid: number, db): Promise<ResultData>
 }

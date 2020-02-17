@@ -168,7 +168,7 @@ export default class TopicService implements TopicInterface {
   }
   async getCommentLen(topicid: number, db): Promise<any> {
     try {
-      const selectCommentSentence = `select * from user where topic_id = ? and comment_type = 1`
+      const selectCommentSentence = `select * from comment where topic_id = ? and comment_type = 1`
       const [rows, fileds] = await db.query(selectCommentSentence, [topicid])
       return rows.length;
     } catch (err) {
