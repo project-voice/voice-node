@@ -26,12 +26,12 @@ export const createIdentity = (num: number): string => {
 /**
  * 调阿里云oss
  */
-export const uploadOss = async (files: Array<File>) => {
+export const uploadOss = async (dir: string, files: Array<File>) => {
   const filesPath: Array<String> = []
   try {
     for (let i = 0; i < files.length; i++) {
       const file = files[i] as any;
-      const result = await client.put(`voice/${file.name}`, file.path)
+      const result = await client.put(`voice/${dir}/${file.name}`, file.path)
       filesPath.push(result.url)
     }
     return filesPath

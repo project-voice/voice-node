@@ -211,7 +211,7 @@ export default class TopicService implements TopicInterface {
   }
   async releaseTopic(userid: number, topicType: string, content: string, images: Array<File>, db): Promise<ResultData> {
     try {
-      const filesPath = await uploadOss(images)
+      const filesPath = await uploadOss('topic', images)
       const insertSentence = `insert into topic(user_id,topic_content,create_time,topic_type) values(?,?,?,?)`
       const createTime = Date.now()
       const contentJson = JSON.stringify({

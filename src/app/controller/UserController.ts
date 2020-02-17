@@ -27,7 +27,12 @@ export default class UserController extends BaseController {
   @Post('/update-info')
   async updateInfo(@Params(['body']) params) {
     try {
-      const { user_id: userid, key, value } = params
+      let { user_id: userid, key, value } = params
+      if (key === 'user_image') {
+        const request = this.ctx.request as any;
+        value = request.files['value'];
+      }
+      console.log(key, value)
       const result = await this.userService.updateInfo(userid, key, value, this.ctx.db)
       this.ctx.body = result
     } catch (err) {

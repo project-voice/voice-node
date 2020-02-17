@@ -1,5 +1,6 @@
 import { Injectable } from 'kever'
 import { UserInterface, ResultData } from '../interface'
+import { uploadOss } from '../utils'
 
 @Injectable('user')
 export default class UserService implements UserInterface {
@@ -75,8 +76,14 @@ export default class UserService implements UserInterface {
    * @param password
    * @param db
    */
-  async updateInfo(userid: number, key: string, value: string, db: any): Promise<ResultData> {
+  async updateInfo(userid: number, key: string, value: string | File, db: any): Promise<ResultData> {
     try {
+      let filesPath;
+      if (key === 'user_image') {
+        filesPath = await uploadOss('user', [value as File])
+        value = filesPath[0]
+      }
+      console.log('value', value)
       const updateSentence = `update user set ${key} = ? where user_id = ?`
       const [rows, fields] = await db.query(updateSentence, [value, userid])
       if (rows.affectedRows) {
