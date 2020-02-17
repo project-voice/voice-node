@@ -1,6 +1,7 @@
 import { Injectable } from 'kever'
 import { UserInterface, ResultData } from '../interface'
 import { uploadOss } from '../utils'
+import { getUser } from './common'
 
 @Injectable('user')
 export default class UserService implements UserInterface {
@@ -124,31 +125,16 @@ export default class UserService implements UserInterface {
       const selectFollowSentence = `select followuser_id from follow where user_id = ?`
       const [rows, fields] = await db.query(selectFollowSentence, [userid])
       const followList: Array<number> = rows.reduce((list, item) => list.concat([item.followuser_id]), [])
-      const usersPromise = followList.map(userid => this.getUser(userid, db))
+      const usersPromise = followList.map(userid => getUser(userid, db))
       const usersInfo = await Promise.all(usersPromise)
       return Object.assign({}, this.data, {
         message: '获取列表成功',
-        data: usersInfo.map(user => user.data)
+        data: usersInfo
       })
     } catch (err) {
       return Object.assign({}, this.data, {
         noerr: 1,
         message: '获取列表失败',
-        data: err
-      })
-    }
-  }
-  async getUser(userid: number, db: any): Promise<ResultData> {
-    try {
-      const selectUserSentence = `select * from user where user_id = ?`
-      const [rows, fileds] = await db.query(selectUserSentence, [userid])
-      return Object.assign({}, this.data, {
-        data: rows
-      })
-    } catch (err) {
-      return Object.assign({}, this.data, {
-        noerr: 1,
-        message: '获取用户信息失败',
         data: err
       })
     }

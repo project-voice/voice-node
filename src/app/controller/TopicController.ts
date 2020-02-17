@@ -4,6 +4,10 @@ import { Controller, BaseController, Inject, Get, Params, Post, Req } from 'keve
 export default class TopicController extends BaseController {
   @Inject('topic')
   private topicService
+  @Inject('support')
+  private supportService
+  @Inject('comment')
+  public commentService
 
   @Get('/get-topic-all')
   async getTopicAll(@Params(['query']) params) {
@@ -20,19 +24,19 @@ export default class TopicController extends BaseController {
   @Get('/support')
   async support(@Params(['query']) params) {
     const { topic_id: topicid, user_id: userid } = params
-    const result = await this.topicService.support(topicid, userid, this.ctx.db)
+    const result = await this.supportService.support(userid, topicid, 1, this.ctx.db)
     this.ctx.body = result
   }
   @Get('/comment')
   async comment(@Params(['query']) params) {
     const { release_id: releaseid, topic_id: topicid, user_id: userid, comment_content: commentContent } = params
-    const result = await this.topicService.comment(releaseid, topicid, userid, commentContent, this.ctx.db)
+    const result = await this.commentService.comment(releaseid, topicid, userid, commentContent, 1, this.ctx.db)
     this.ctx.body = result
   }
   @Get('/comment-list')
   async getCommentList(@Params(['query']) params) {
     const { topic_id: topicid, page, count } = params
-    const result = await this.topicService.getCommentList(topicid, page, count, this.ctx.db);
+    const result = await this.commentService.getCommentList(topicid, 1, page, count, this.ctx.db);
     this.ctx.body = result;
   }
   @Post('/release-topic')

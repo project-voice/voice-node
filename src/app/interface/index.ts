@@ -83,28 +83,7 @@ export interface TopicInterface {
    * @param count 
    */
   getTopic(actionUserid: number, topicType: string, page: number, count: number, db: any): Promise<ResultData>
-  /**
-   * 点赞
-   * @param topicid 
-   * @param userid 
-   */
-  support(topicid: number, userid: number, db: any): Promise<ResultData>
-  /**
-   * 评论
-   * @param releaseid 
-   * @param topicid 
-   * @param userid 
-   * @param commentContent 
-   */
-  comment(releaseid: number, topicid: number, userid: number, commentContent: string, db: any): Promise<ResultData>
-  /**
-   * 获取评论列表
-   * @param topicid 
-   * @param page 
-   * @param count 
-   * @param db 
-   */
-  getCommentList(topicid: number, page: number, count: number, db: any): Promise<ResultData>
+
   /**
    * 发布主题
    * @param userid 
@@ -120,29 +99,6 @@ export interface TopicInterface {
  */
 export interface VideoInterface {
   /**
-   * 获取第一页关注和推荐的视频列表
-   * @param userid 
-   * @param count 
-   * @param db 
-   */
-  getVideoListAll(userid: number, count: number, db: any): Promise<ResultData>
-  /**
-   * 获取某个的视频列表，分页
-   * @param userid 
-   * @param count 
-   * @param page 
-   * @param type 
-   * @param db 
-   */
-  getVideoList(userid: number, count: number, page: number, type: string, db: any): Promise<ResultData>
-  /**
-   * 点赞
-   * @param userid 
-   * @param videoid 
-   * @param db 
-   */
-  support(userid: number, videoid: number, db: any): Promise<ResultData>
-  /**
    * 发布视频
    * @param userid 
    * @param description 
@@ -151,22 +107,52 @@ export interface VideoInterface {
    */
   releaseVideo(userid: number, description: string, video: File, db: any): Promise<ResultData>
   /**
-   * 评论
-   * @param releaseid 
+   * 获取关注视频列表
    * @param userid 
-   * @param videoid 
-   * @param commentContent 
+   * @param count 
+   * @param page 
    * @param db 
    */
-  comment(releaseid: number, userid: number, videoid: number, commentContent: string, db: any): Promise<ResultData>
+  getVideoListFollow(userid: number, count: number, page: number, db: any): Promise<ResultData>
   /**
-   * 获取评论列表，分页
-   * @param videoid 
+   * 获取推荐的视频列表
+   * @param userid 
+   * @param count 
+   * @param page 
+   * @param db 
+   */
+  getVideoListRecommend(userid: number, count: number, page: number, db: any): Promise<ResultData>
+}
+
+export interface SupportInterface {
+  /**
+   * 通用点赞接口
+   * @param userid 
+   * @param topicid 
+   * @param supportType 
+   * @param db 
+   */
+  support(userid: number, topicid: number, supportType: number, db: any): Promise<ResultData>
+}
+
+export interface CommentInterface {
+  /**
+   * 评论
+   * @param releaseid 
+   * @param topicid 
+   * @param userid 
+   * @param commentContent 
+   * @param commentType 
+   * @param db 
+   */
+  comment(releaseid: number, topicid: number, userid: number, commentContent: string, commentType: number, db: any): Promise<ResultData>
+  /**
+   * 获取评论列表
+   * @param topicid 
+   * @param commentType 
    * @param page 
    * @param count 
    * @param db 
    */
-  getCommentList(videoid: number, page: number, count: number, db: any): Promise<ResultData>
+  getCommentList(topicid: number, commentType: number, page: number, count: number, db: any): Promise<ResultData>
 }
-
-

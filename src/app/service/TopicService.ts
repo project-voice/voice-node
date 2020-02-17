@@ -1,6 +1,7 @@
 import { Injectable } from 'kever'
 import { TopicInterface, ResultData } from '../interface';
 import { uploadOss, beforeTime } from '../utils'
+import { getSupport, getUser } from './common'
 
 @Injectable('topic')
 export default class TopicService implements TopicInterface {
@@ -49,7 +50,7 @@ export default class TopicService implements TopicInterface {
             support = su;
             commentLen = len
           } else {
-            const userPromise = this.getUser(userid, db);
+            const userPromise = getUser(userid, db);
             const commentLenPromise = this.getCommentLen(topicid, db)
             const supportPromise = this.getSupport(topicid, actionUserid, db);
             const [user, len, su] = await Promise.all([userPromise, commentLenPromise, supportPromise])
@@ -114,7 +115,7 @@ export default class TopicService implements TopicInterface {
           support = su;
           commentLen = len
         } else {
-          const userPromise = this.getUser(userid, db);
+          const userPromise = getUser(userid, db);
           const commentLenPromise = this.getCommentLen(topicid, db)
           const supportPromise = this.getSupport(topicid, actionUserid, db);
           const [user, len, su] = await Promise.all([userPromise, commentLenPromise, supportPromise])
@@ -143,74 +144,6 @@ export default class TopicService implements TopicInterface {
       })
     }
   }
-  async support(topicid: number, userid: number, db): Promise<ResultData> {
-    try {
-      const insertSupportSentence = `insert into support(user_id,support_type,topic_id) values(?,1,?)`
-      const [rows, fileds] = await db.query(insertSupportSentence, [userid, topicid])
-      const support = await this.getSupport(topicid, userid, db)
-      return Object.assign({}, this.data, {
-        message: '点赞成功',
-        data: support
-      })
-    } catch (err) {
-      return Object.assign({}, this.data, {
-        noerr: 1,
-        message: '点赞失败'
-      })
-    }
-  }
-  async comment(releaseid: number, topicid: number, userid: number, commentContent: string, db): Promise<ResultData> {
-    try {
-      const insertCommentSentence = `insert into comment(release_id,topic_id,user_id,comment_content,create_time) values(?,?,?,?,?)`
-      const createTime = Date.now();
-      const [rows, fileds] = await db.query(insertCommentSentence, [releaseid, topicid, userid, commentContent, createTime])
-      if (rows.affectedRows === 1) {
-        return Object.assign({}, this.data, {
-          message: '评论成功'
-        })
-      } else {
-        throw new Error();
-      }
-    } catch (err) {
-      console.log(err)
-      return Object.assign({}, this.data, {
-        noerr: 1,
-        message: '评论失败'
-      })
-    }
-  }
-  async getCommentList(topicid: number, page: number, count: number, db): Promise<ResultData> {
-    try {
-      const selectCommentSentence = `select * from comment where topic_id = ?`
-      let [rows, fileds] = await db.query(selectCommentSentence, [topicid])
-      rows.sort((a, b) => b.create_time - a.create_time)
-      // 分页
-      rows = rows.slice((page - 1) * count, page * count);
-      for (let comment of rows) {
-        const releaseid = comment.release_id
-        const userid = comment.user_id
-        let createTime = comment.create_time
-        createTime = beforeTime(createTime)
-        const releaseInfoPromise = this.getUser(releaseid, db)
-        const userInfoPromise = this.getUser(userid, db)
-        const [releaseInfo, userInfo] = await Promise.all([releaseInfoPromise, userInfoPromise])
-        Object.assign(comment, {
-          create_time: createTime,
-          user_name: userInfo.user_name,
-          release_name: releaseInfo.user_name
-        })
-      }
-      return Object.assign({}, this.data, {
-        message: '获取评论列表成功',
-        data: rows
-      })
-    } catch (err) {
-      return Object.assign({}, this.data, {
-        noerr: 1,
-        message: '获取评论列表失败'
-      })
-    }
-  }
   async releaseTopic(userid: number, topicType: string, content: string, images: Array<File>, db): Promise<ResultData> {
     try {
       const filesPath = await uploadOss('topic', images)
@@ -233,19 +166,9 @@ export default class TopicService implements TopicInterface {
       })
     }
   }
-  async getUser(userid: number, db): Promise<any> {
+  async getCommentLen(topicid: number, db): Promise<any> {
     try {
-      const selectUserSentence = `select * from user where user_id = ?`
-      const [rows, fileds] = await db.query(selectUserSentence, [userid])
-      return rows[0];
-    } catch (err) {
-      console.log(err);
-      return {}
-    }
-  }
-  async getCommentLen(topicid: number, db): Promise<unknown> {
-    try {
-      const selectCommentSentence = `select * from user where topic_id = ?`
+      const selectCommentSentence = `select * from user where topic_id = ? and comment_type = 1`
       const [rows, fileds] = await db.query(selectCommentSentence, [topicid])
       return rows.length;
     } catch (err) {
@@ -253,14 +176,13 @@ export default class TopicService implements TopicInterface {
       return 0;
     }
   }
-  async getSupport(topicid: number, actionUserid: number, db): Promise<unknown> {
+  async getSupport(topicid: number, actionUserid: number, db): Promise<any> {
     try {
-      const selectSupportSentence = `select * from support where topic_id = ? and support_type=1`;
-      const [rows, fileds] = await db.query(selectSupportSentence, [topicid])
-      const flag = rows.some(item => item.user_id === +actionUserid);
+      const result = await getSupport(topicid, 1, db)
+      const flag = result.some(item => item.user_id === +actionUserid);
       return {
         action: !!flag,
-        count: rows.length
+        count: result.length
       }
     } catch (err) {
       console.log(err)
