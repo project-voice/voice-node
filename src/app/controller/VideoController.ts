@@ -15,12 +15,12 @@ export default class VideoController extends BaseController {
   async getVideoListAll(@Params(['query']) params) {
     try {
       const { user_id: userid, count } = params
-      let followList = await this.userSevice.getFollowList(userid, this.ctx.db)
+      let { data: followList } = await this.userSevice.getFollowList(userid, this.ctx.db)
       followList = followList.map(user => user.user_id)
       const followPromise = this.videoService.getVideoListFollow(userid, followList, count, 1, this.ctx.db)
       const recommendPromise = this.videoService.getVideoListRecommend(userid, count, 1, this.ctx.db)
       const [follow, recommend] = await Promise.all([followPromise, recommendPromise])
-      return Object.assign({}, this.videoService.data, {
+      this.ctx.body = Object.assign({}, this.videoService.data, {
         message: '获取视频列表成功',
         data: {
           follow,
@@ -28,7 +28,7 @@ export default class VideoController extends BaseController {
         }
       })
     } catch (err) {
-      return Object.assign({}, this.videoService.data, {
+      this.ctx.body = Object.assign({}, this.videoService.data, {
         noerr: 1,
         message: '获取视频列表失败'
       })
@@ -40,18 +40,18 @@ export default class VideoController extends BaseController {
       const { user_id: userid, count, page, type } = params
       let result;
       if (type === 'follow') {
-        let followList = await this.userSevice.getFollowList(userid, this.ctx.db)
+        let { data: followList } = await this.userSevice.getFollowList(userid, this.ctx.db)
         followList = followList.map(user => user.user_id)
         result = await this.videoService.getVideoListFollow(userid, followList, count, page, this.ctx.db)
       } else {
         result = await this.videoService.getVideoListRecommend(userid, count, page, this.ctx.db)
       }
-      return Object.assign({}, this.videoService.data, {
+      this.ctx.body = Object.assign({}, this.videoService.data, {
         message: '获取视频列表成功',
         data: result
       })
     } catch (err) {
-      return Object.assign({}, this.videoService.data, {
+      this.ctx.body = Object.assign({}, this.videoService.data, {
         noerr: 1,
         message: '获取视频列表失败'
       })

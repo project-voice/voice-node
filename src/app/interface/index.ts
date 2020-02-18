@@ -113,7 +113,7 @@ export interface VideoInterface {
    * @param page 
    * @param db 
    */
-  getVideoListFollow(userid: number, count: number, page: number, db: any): Promise<ResultData>
+  getVideoListFollow(userid: number, followList: Array<number>, count: number, page: number, db: any): Promise<ResultData>
   /**
    * 获取推荐的视频列表
    * @param userid 
@@ -128,6 +128,19 @@ export interface VideoInterface {
    * @param db 
    */
   share(videoid: number, db: any): Promise<ResultData>
+  /**
+   * 获取某一用户所发布的所有视频
+   * @param userid 
+   * @param db 
+   */
+  getVideos(userid: number, db: any): Promise<any>
+  /**
+   * 整合输出视频接口所需要的用户信息及点赞信息
+   * @param videos 
+   * @param actionUserid 
+   * @param db 
+   */
+  normalVideoList(videos: Array<any>, actionUserid: number, db: any): Promise<Array<any>>
 }
 
 export interface SupportInterface {

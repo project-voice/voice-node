@@ -1,6 +1,7 @@
 import { Injectable } from 'kever'
 import { VideoInterface, ResultData } from '../interface';
-import { uploadOss } from '../utils';
+import { uploadOss, beforeTime } from '../utils';
+import { getSupport, getUser, getCommentLen } from './common'
 
 @Injectable('video')
 export default class VideService implements VideoInterface {
@@ -32,12 +33,30 @@ export default class VideService implements VideoInterface {
     }
   }
   //获取关注的视频列表
-  async getVideoListFollow(userid: number, count: number, page: number, db: any): Promise<ResultData> {
-    return this.data;
+  async getVideoListFollow(actionUserid: number, followList: Array<number>, count: number, page: number, db: any): Promise<any> {
+    try {
+      const followListPromise = followList.map(followid => this.getVideos(followid, db))
+      let followVideoList = await Promise.all(followListPromise)
+      followVideoList.sort((a, b) => b.create_time - a.create_time)
+      followVideoList = followVideoList.slice((page - 1) * count, page * count).reduce((list, videos) => list.concat(videos), [])
+      followVideoList = await this.normalVideoList(followVideoList, actionUserid, db)
+      return followVideoList
+    } catch (err) {
+      return {}
+    }
   }
   //获取推荐的视频列表
-  async getVideoListRecommend(userid: number, count: number, page: number, db: any): Promise<ResultData> {
-    return this.data
+  async getVideoListRecommend(actionUserid: number, count: number, page: number, db: any): Promise<any> {
+    try {
+      const selectVideoSentence = `select * from video`
+      let [videos, fileds] = await db.query(selectVideoSentence)
+      videos.sort((a, b) => b.create_time - a.create_time)
+      videos = videos.slice((page - 1) * count, page * count)
+      videos = await this.normalVideoList(videos, actionUserid, db)
+      return videos
+    } catch (err) {
+      return {}
+    }
   }
   async share(videoid: number, db: any): Promise<ResultData> {
     try {
@@ -64,5 +83,51 @@ export default class VideService implements VideoInterface {
         data: err
       })
     }
+  }
+  async getVideos(userid: number, db: any): Promise<any> {
+    try {
+      const selectVideoSentence = `select * from video where user_id = ?`
+      let [videos, fileds] = await db.query(selectVideoSentence, [userid])
+      return videos
+    } catch (err) {
+      return []
+    }
+  }
+  async normalVideoList(videos: Array<any>, actionUserid: number, db: any): Promise<Array<any>> {
+    let userPoll = new Map()
+    for (let video of videos) {
+      const videoid = video.video_id
+      const userid = video.user_id
+      let supports, userInfo, commentLen
+      if (userPoll.has(userid)) {
+        userInfo = userPoll.get(userid)
+        const supportsPromise = getSupport(videoid, 0, db)
+        const commentLenPromise = getCommentLen(videoid, 0, db)
+        const resultData = await Promise.all([supportsPromise, commentLenPromise])
+        supports = resultData[0]
+        commentLen = resultData[1]
+      } else {
+        const supportsPromise = getSupport(videoid, 0, db)
+        const userInfoPromise = getUser(userid, db)
+        const commentLenPromise = getCommentLen(videoid, 0, db)
+        const resultData = await Promise.all([supportsPromise, userInfoPromise, commentLenPromise])
+        supports = resultData[0]
+        userInfo = resultData[1]
+        commentLen = resultData[2]
+        userPoll.set(userid, userInfo)
+      }
+      const isSupport = supports.some(item => item.user_id == actionUserid)
+      Object.assign(video, {
+        user_name: userInfo.user_name,
+        user_image: userInfo.user_image,
+        create_time: beforeTime(video.create_time),
+        comment: commentLen,
+        support: {
+          action: isSupport,
+          count: supports.length
+        }
+      })
+    }
+    return videos
   }
 }

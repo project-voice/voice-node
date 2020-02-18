@@ -1,7 +1,7 @@
 import { Injectable } from 'kever'
 import { TopicInterface, ResultData } from '../interface';
 import { uploadOss, beforeTime } from '../utils'
-import { getSupport, getUser } from './common'
+import { getSupport, getUser, getCommentLen } from './common'
 
 @Injectable('topic')
 export default class TopicService implements TopicInterface {
@@ -33,7 +33,7 @@ export default class TopicService implements TopicInterface {
       }, [])
       result.unshift(allTopic);
       // 用户池，避免多余的请求
-      const userPoll = {}
+      const userPoll = new Map()
       for (let i = 0; i < result.length; i++) {
         let topic = result[i];
         for (let j = 0; j < topic.length; j++) {
@@ -42,21 +42,21 @@ export default class TopicService implements TopicInterface {
           let userinfo;
           let commentLen;
           let support;
-          if (userPoll[userid]) {
-            userinfo = userPoll[userid];
+          if (userPoll.has(userid)) {
+            userinfo = userPoll.get(userid)
             const supportPromise = this.getSupport(topicid, actionUserid, db);
-            const commentLenPromise = this.getCommentLen(topicid, db);
+            const commentLenPromise = getCommentLen(topicid, 1, db);
             const [su, len] = await Promise.all([supportPromise, commentLenPromise])
             support = su;
             commentLen = len
           } else {
             const userPromise = getUser(userid, db);
-            const commentLenPromise = this.getCommentLen(topicid, db)
+            const commentLenPromise = getCommentLen(topicid, 1, db)
             const supportPromise = this.getSupport(topicid, actionUserid, db);
             const [user, len, su] = await Promise.all([userPromise, commentLenPromise, supportPromise])
             commentLen = len;
             support = su
-            userPoll[userid] = user
+            userPoll.set(userid, user)
             userinfo = user;
           }
 
@@ -99,7 +99,7 @@ export default class TopicService implements TopicInterface {
       rows.sort((a, b) => b.create_time - a.create_time);
       let result = rows.slice((page - 1) * count, page * count);
 
-      let userPoll = {};
+      let userPoll = new Map;
       for (let i = 0; i < result.length; i++) {
         let userinfo;
         let commentLen;
@@ -107,21 +107,21 @@ export default class TopicService implements TopicInterface {
         const item = result[i];
         const userid = item.user_id
         const topicid = item.topic_id
-        if (userPoll[userid]) {
-          userinfo = userPoll[userid];
+        if (userPoll.has(userid)) {
+          userinfo = userPoll.get(userid);
           const supportPromise = this.getSupport(topicid, actionUserid, db);
-          const commentLenPromise = this.getCommentLen(topicid, db);
+          const commentLenPromise = getCommentLen(topicid, 1, db);
           const [su, len] = await Promise.all([supportPromise, commentLenPromise])
           support = su;
           commentLen = len
         } else {
           const userPromise = getUser(userid, db);
-          const commentLenPromise = this.getCommentLen(topicid, db)
+          const commentLenPromise = getCommentLen(topicid, 1, db)
           const supportPromise = this.getSupport(topicid, actionUserid, db);
           const [user, len, su] = await Promise.all([userPromise, commentLenPromise, supportPromise])
           commentLen = len;
           support = su
-          userPoll[userid] = user
+          userPoll.set(userid, user)
           userinfo = user;
         }
         const createTime = beforeTime(item.create_time);
@@ -166,16 +166,7 @@ export default class TopicService implements TopicInterface {
       })
     }
   }
-  async getCommentLen(topicid: number, db): Promise<any> {
-    try {
-      const selectCommentSentence = `select * from comment where topic_id = ? and comment_type = 1`
-      const [rows, fileds] = await db.query(selectCommentSentence, [topicid])
-      return rows.length;
-    } catch (err) {
-      console.log(err);
-      return 0;
-    }
-  }
+
   async getSupport(topicid: number, actionUserid: number, db): Promise<any> {
     try {
       const result = await getSupport(topicid, 1, db)
