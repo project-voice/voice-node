@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "kever-bin --watch --dir=./src --ts",
-    "prod": "npm run build && kever-bin --dir=./dist"
+    "prod": "kever-bin --dir=./dist"
   },
   "repository": {
     "type": "git",

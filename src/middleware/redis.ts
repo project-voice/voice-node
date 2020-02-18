@@ -17,27 +17,26 @@ export default class Redis implements BaseMiddle {
   }
   async ready(ctx, next) {
     ctx.redis = this.client
-    console.log
     await next()
   }
-  get(data) {
-    return new Promise((resolve, reject) => {
-      this.client.get(data, (err, data) => {
-        if (err) {
-          reject(err)
-        }
-        resolve(data)
-      })
-    })
-  }
-  set(key, vlaue) {
-    return new Promise((resolve, reject) => {
-      this.client.set(key, vlaue, (err, data) => {
-        if (err) {
-          reject(err)
-        }
-        resolve(data)
-      })
-    })
-  }
+  // get(data) {
+  //   return new Promise((resolve, reject) => {
+  //     this.client.get(data, (err, data) => {
+  //       if (err) {
+  //         reject(err)
+  //       }
+  //       resolve(data)
+  //     })
+  //   })
+  // }
+  // set(key, vlaue) {
+  //   return new Promise((resolve, reject) => {
+  //     this.client.set(key, vlaue, (err, data) => {
+  //       if (err) {
+  //         reject(err)
+  //       }
+  //       resolve(data)
+  //     })
+  //   })
+  // }
 }

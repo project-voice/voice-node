@@ -139,4 +139,23 @@ export default class UserService implements UserInterface {
       })
     }
   }
+  async cancelFollow(userid: number, followid: number, db: any): Promise<ResultData> {
+    try {
+      const deleteSentence = `delete follow where user_id=? and followuser_id=?`
+      const [rows, fileds] = await db.query(deleteSentence, [userid, followid])
+      if (rows.affectedRows === 1) {
+        return Object.assign({}, this.data, {
+          message: '取消成功'
+        })
+      } else {
+        throw new Error()
+      }
+    } catch (err) {
+      return Object.assign({}, this.data, {
+        noerr: 1,
+        message: '取消失败',
+        data: err
+      })
+    }
+  }
 }

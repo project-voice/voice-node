@@ -20,7 +20,7 @@ const email = {
 
 // redis
 const redis = {
-  RDS_PORT: 6379,
+  RDS_PORT: 6380,
   RDS_HOST: '39.105.106.168',
   RDS_OPTS: {}
 }
