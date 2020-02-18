@@ -41,6 +41,6 @@ export default class UserController extends BaseController {
   async cancelFollow(@Params(['query']) params) {
     const { user_id: userid, follow_id: followid } = params
     const result = await this.userService.cancelFollow(userid, followid, this.ctx.db)
-    this.ctx.body - result
+    this.ctx.body = result
   }
 }
