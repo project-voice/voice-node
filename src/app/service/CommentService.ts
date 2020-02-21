@@ -34,6 +34,7 @@ export default class CommentService implements CommentInterface {
       const selectCommentSentence = `select * from comment where topic_id = ? and comment_type=?`
       let [rows, fileds] = await db.query(selectCommentSentence, [topicid, commentType])
       rows.sort((a, b) => b.create_time - a.create_time)
+      const maxCount = rows.length;
       // 分页
       rows = rows.slice((page - 1) * count, page * count);
       for (let comment of rows) {
@@ -47,14 +48,19 @@ export default class CommentService implements CommentInterface {
         Object.assign(comment, {
           create_time: createTime,
           user_name: userInfo.user_name,
+          user_image: userInfo.user_image,
           release_name: releaseInfo.user_name
         })
       }
       return Object.assign({}, this.data, {
         message: '获取评论列表成功',
-        data: rows
+        data: {
+          count: maxCount,
+          list: rows
+        }
       })
     } catch (err) {
+      console.log(err);
       return Object.assign({}, this.data, {
         noerr: 1,
         message: '获取评论列表失败'

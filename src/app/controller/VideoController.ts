@@ -18,7 +18,7 @@ export default class VideoController extends BaseController {
       let { data: followList } = await this.userSevice.getFollowList(userid, this.ctx.db)
       followList = followList.map(user => user.user_id)
       const followPromise = this.videoService.getVideoListFollow(userid, followList, count, 1, this.ctx.db)
-      const recommendPromise = this.videoService.getVideoListRecommend(userid, count, 1, this.ctx.db)
+      const recommendPromise = this.videoService.getVideoListRecommend(userid, followList, count, 1, this.ctx.db)
       const [follow, recommend] = await Promise.all([followPromise, recommendPromise])
       this.ctx.body = Object.assign({}, this.videoService.data, {
         message: '获取视频列表成功',
@@ -39,12 +39,12 @@ export default class VideoController extends BaseController {
     try {
       const { user_id: userid, count, page, type } = params
       let result;
+      let { data: followList } = await this.userSevice.getFollowList(userid, this.ctx.db)
+      followList = followList.map(user => user.user_id)
       if (type === 'follow') {
-        let { data: followList } = await this.userSevice.getFollowList(userid, this.ctx.db)
-        followList = followList.map(user => user.user_id)
         result = await this.videoService.getVideoListFollow(userid, followList, count, page, this.ctx.db)
       } else {
-        result = await this.videoService.getVideoListRecommend(userid, count, page, this.ctx.db)
+        result = await this.videoService.getVideoListRecommend(userid, followList, count, page, this.ctx.db)
       }
       this.ctx.body = Object.assign({}, this.videoService.data, {
         message: '获取视频列表成功',

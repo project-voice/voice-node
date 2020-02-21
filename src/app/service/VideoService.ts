@@ -37,22 +37,23 @@ export default class VideService implements VideoInterface {
     try {
       const followListPromise = followList.map(followid => this.getVideos(followid, db))
       let followVideoList = await Promise.all(followListPromise)
-      followVideoList.sort((a, b) => b.create_time - a.create_time)
-      followVideoList = followVideoList.slice((page - 1) * count, page * count).reduce((list, videos) => list.concat(videos), [])
-      followVideoList = await this.normalVideoList(followVideoList, actionUserid, db)
+      followVideoList = followVideoList.reduce((result, follow) => result.concat(follow), [])
+        .sort((a, b) => b.create_time - a.create_time)
+
+      followVideoList = await this.normalVideoList(followVideoList, followList, actionUserid, db)
       return followVideoList
     } catch (err) {
-      return {}
+      console.log(err);
+      return []
     }
   }
   //获取推荐的视频列表
-  async getVideoListRecommend(actionUserid: number, count: number, page: number, db: any): Promise<any> {
+  async getVideoListRecommend(actionUserid: number, followList: Array<number>, count: number, page: number, db: any): Promise<any> {
     try {
       const selectVideoSentence = `select * from video`
       let [videos, fileds] = await db.query(selectVideoSentence)
       videos.sort((a, b) => b.create_time - a.create_time)
-      videos = videos.slice((page - 1) * count, page * count)
-      videos = await this.normalVideoList(videos, actionUserid, db)
+      videos = await this.normalVideoList(videos, followList, actionUserid, db)
       return videos
     } catch (err) {
       return {}
@@ -93,19 +94,20 @@ export default class VideService implements VideoInterface {
       return []
     }
   }
-  async normalVideoList(videos: Array<any>, actionUserid: number, db: any): Promise<Array<any>> {
+  async normalVideoList(videos: Array<any>, followList: Array<number>, actionUserid: number, db: any): Promise<Array<any>> {
     let userPoll = new Map()
     for (let video of videos) {
       const videoid = video.video_id
       const userid = video.user_id
+      const isFollow = followList.some(id => id == userid)
       let supports, userInfo, commentLen
       if (userPoll.has(userid)) {
-        userInfo = userPoll.get(userid)
         const supportsPromise = getSupport(videoid, 0, db)
         const commentLenPromise = getCommentLen(videoid, 0, db)
         const resultData = await Promise.all([supportsPromise, commentLenPromise])
         supports = resultData[0]
         commentLen = resultData[1]
+        userInfo = userPoll.get(userid)
       } else {
         const supportsPromise = getSupport(videoid, 0, db)
         const userInfoPromise = getUser(userid, db)
@@ -122,6 +124,7 @@ export default class VideService implements VideoInterface {
         user_image: userInfo.user_image,
         create_time: beforeTime(video.create_time),
         comment: commentLen,
+        follow: isFollow,
         support: {
           action: isSupport,
           count: supports.length

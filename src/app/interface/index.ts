@@ -121,7 +121,7 @@ export interface VideoInterface {
    * @param page 
    * @param db 
    */
-  getVideoListRecommend(userid: number, count: number, page: number, db: any): Promise<ResultData>
+  getVideoListRecommend(userid: number, followList: Array<number>, count: number, page: number, db: any): Promise<ResultData>
   /**
    * 分享
    * @param videoid 
@@ -140,7 +140,7 @@ export interface VideoInterface {
    * @param actionUserid 
    * @param db 
    */
-  normalVideoList(videos: Array<any>, actionUserid: number, db: any): Promise<Array<any>>
+  normalVideoList(videos: Array<any>, followList: Array<number>, actionUserid: number, db: any): Promise<Array<any>>
 }
 
 export interface SupportInterface {
