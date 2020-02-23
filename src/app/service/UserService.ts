@@ -40,18 +40,10 @@ export default class UserService implements UserInterface {
    * @param password
    * @param db
    */
-  async login(username: string, email: string, password: string, db: any): Promise<ResultData> {
+  async login(email: string, password: string, db: any): Promise<ResultData> {
     try {
-      let querySentence: string
-      let key: string
-      if (username) {
-        querySentence = 'select * from `user` where `user_name` = ? and `user_password` = ?'
-        key = username
-      } else {
-        querySentence = 'select * from `user` where `user_email` = ? and `user_password` = ?'
-        key = email
-      }
-      const [row, fields] = await db.query(querySentence, [key, password])
+      let querySentence = 'select * from `user` where `user_email` = ? and `user_password` = ?'
+      const [row, fields] = await db.query(querySentence, [email, password])
       if (row.length) {
         return Object.assign({}, this.data, {
           message: '登录成功',
@@ -60,13 +52,13 @@ export default class UserService implements UserInterface {
       } else {
         return Object.assign({}, this.data, {
           noerr: 1,
-          message: '登录失败'
+          message: '您的邮箱或密码输入错误！'
         })
       }
     } catch (err) {
       return Object.assign({}, this.data, {
         noerr: 1,
-        message: '登录失败',
+        message: '您的邮箱或密码输入错误！',
         data: err
       })
     }

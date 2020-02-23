@@ -94,7 +94,12 @@ export default class TopicService implements TopicInterface {
   }
   async getTopic(actionUserid: number, topicType: string, page: number, count: number, db): Promise<ResultData> {
     try {
-      const selectVoiceSentence = `select * from topic where topic_type = ?`
+      let selectVoiceSentence;
+      if (topicType === '全部') {
+        selectVoiceSentence = `select * from topic`
+      } else {
+        selectVoiceSentence = `select * from topic where topic_type = ?`
+      }
       const [rows, fileds] = await db.query(selectVoiceSentence, [topicType])
       rows.sort((a, b) => b.create_time - a.create_time);
       let result = rows.slice((page - 1) * count, page * count);

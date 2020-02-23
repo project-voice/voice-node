@@ -11,8 +11,8 @@ export default class UserController extends BaseController {
   }
   @Post('/login')
   async login(@Params(['body']) params) {
-    const { user_name: username, user_password: password, user_email: email } = params
-    const result = await this.userService.login(username, email, password, this.ctx.db)
+    const { user_password: password, user_email: email } = params
+    const result = await this.userService.login(email, password, this.ctx.db)
     this.ctx.body = result
   }
   @Post('/update-info')

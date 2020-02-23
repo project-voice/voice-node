@@ -42,7 +42,10 @@ export default class TopicController extends BaseController {
   @Post('/release-topic')
   async releaseTopic(@Params(['body']) params) {
     const request = this.ctx.request as any;
-    const images = request.files['images[]'];
+    let images = request.files['images[]'];
+    if (!Array.isArray(images)) {
+      images = [images];
+    }
     const { user_id: userid, topic_type: topicType, content } = params
     const result = await this.topicService.releaseTopic(userid, topicType, content, images, this.ctx.db)
     this.ctx.body = result
