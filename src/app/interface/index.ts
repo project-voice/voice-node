@@ -181,3 +181,28 @@ export interface CommentInterface {
    */
   deleteComment(commentid: number, db): Promise<ResultData>
 }
+
+export interface FeedbackInterface {
+  /**
+   * 获取意见反馈列表
+   * @param db 
+   */
+  getFeedbackList(db: any): Promise<ResultData>
+  /**
+   * 发布一个意见
+   * @param userid 
+   * @param feedbackContent 
+   */
+  releaseFeedback(userid: number, feedbackContent: string, db: any): Promise<ResultData>
+  /**
+   * 删除一个意见
+   * @param feedbackid 
+   */
+  deleteFeedback(feedbackid: number, db: any): Promise<ResultData>
+  /**
+   * 更新意见的状态
+   * @param feedbackid 
+   * @param feedbackStatus 
+   */
+  updateStatus(feedbackid: number, feedbackStatus: number, db: any): Promise<ResultData>
+}
