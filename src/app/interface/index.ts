@@ -211,6 +211,12 @@ export interface FeedbackInterface {
    * @param feedbackStatus 
    */
   updateStatus(feedbackid: number, feedbackStatus: number, db: any): Promise<ResultData>
+  /**
+   * 获取发布这条问题的用户id
+   * @param feedbackid 
+   * @param db 
+   */
+  getFeedback(feedbackid: number, db: any): Promise<any>
 }
 
 export interface MessageInterface {

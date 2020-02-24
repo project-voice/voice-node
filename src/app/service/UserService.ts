@@ -21,7 +21,8 @@ export default class UserService implements UserInterface {
       const createTime = Date.now()
       const insertSentence = `insert into user(user_name,user_password,user_email,create_time) values(?,?,?,?)`
       const [rows, fields] = await db.query(insertSentence, [username, password, email, createTime])
-      console.log('result:', rows, fields)
+      // 自己关注自己
+      await this.follow(rows.insertId, rows.insertId, db);
       return Object.assign({}, this.data, {
         message: '注册成功'
       })

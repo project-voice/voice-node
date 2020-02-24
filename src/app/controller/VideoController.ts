@@ -73,12 +73,12 @@ export default class VideoController extends BaseController {
     const { user_id: userid, video_description: description } = params
     // 发布视频
     const result = await this.videoService.releaseVideo(userid, description, video, this.ctx.db)
-    // 获取关注当前用户的列表
+    // 发布系统通知
     const followListPromise = this.userSevice.getFollowed(userid, this.ctx.db)
-    const userInfoPromises = getUser(userid, this.ctx.db)
-    const [followList, userInfo] = await Promise.all([followListPromise, userInfoPromises])
+    const userInfoPromise = getUser(userid, this.ctx.db)
+    const [followList, userInfo] = await Promise.all([followListPromise, userInfoPromise])
     if (followList.length) {
-      await this.messageService.createMessage(userid, '短视频发布', `您关注的${userInfo.user_name}发布了新作品`, followList, this.ctx.db);
+      await this.messageService.createMessage(userid, '短视频发布', `您关注的${userInfo.user_name}发布了短视频，快来看呀。`, followList, this.ctx.db);
     }
     this.ctx.body = result
   }

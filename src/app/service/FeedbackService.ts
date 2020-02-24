@@ -66,9 +66,11 @@ export default class FeedbackService implements FeedbackInterface {
     try {
       const updateSentence = 'update feedback set feedback_status = ? where feedback_id = ?'
       const [rows, fileds] = await db.query(updateSentence, [feedbackStatus, feedbackid])
+      const userid = await this.getFeedback(feedbackid, db);
       if (rows.affectedRows == 1) {
         return Object.assign({}, this.data, {
-          message: '更新成功'
+          message: '更新成功',
+          data: userid
         })
       } else {
         throw new Error()
@@ -80,5 +82,10 @@ export default class FeedbackService implements FeedbackInterface {
         message: '更新失败'
       })
     }
+  }
+  async getFeedback(feedbackid: number, db: any): Promise<any> {
+    const selectSentence = 'select user_id from feedback where feedback_id = ?'
+    const [rows, fileds] = await db.query(selectSentence, [feedbackid])
+    return rows[0].user_id
   }
 }

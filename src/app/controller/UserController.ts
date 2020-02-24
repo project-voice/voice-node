@@ -1,4 +1,5 @@
 import { Controller, BaseController, Inject, Get, Post, Params } from 'kever'
+import { ResultData } from '../interface'
 
 @Controller('/user')
 export default class UserController extends BaseController {
@@ -36,7 +37,8 @@ export default class UserController extends BaseController {
   @Get('/follow-list')
   async getFollowList(@Params(['query']) params) {
     const { user_id: userid } = params
-    const result = await this.userService.getFollowList(userid, this.ctx.db)
+    let result: ResultData = await this.userService.getFollowList(userid, this.ctx.db)
+    result.data = (result.data as Array<any>).filter(user => user.user_id != userid)
     this.ctx.body = result
   }
   @Get('/cancel-follow')

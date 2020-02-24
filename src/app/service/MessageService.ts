@@ -23,7 +23,8 @@ export default class MessageService implements MessageInterface {
           let [nowYear, nowMonth, nowDay] = new Date().toJSON().split('T')[0].split('-')
           let timeTxt: string | number = `${year}-${month}-${day}`;
           if (year == nowYear && month == nowMonth && day == nowDay) {
-            timeTxt = beforeTime(createTime);
+            const time = new Date(+createTime).toJSON().split('T')[1].split('.')[0]
+            timeTxt = `今天 ${time}`;
           }
           if (year == nowYear && month == nowMonth && (day + 1) == nowDay) {
             timeTxt = '昨天'

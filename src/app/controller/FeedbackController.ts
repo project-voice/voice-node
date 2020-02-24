@@ -1,9 +1,12 @@
 import { Controller, BaseController, Inject, Get, Params, Post } from 'kever';
+import { getUser } from '../service/common';
 
 @Controller('/feedback')
 export default class FeedbackController extends BaseController {
   @Inject('feedback')
   public feedbackService;
+  @Inject('message')
+  public messageService;
 
   @Get('/get-feedback-list')
   async getFeedbackList() {
@@ -26,6 +29,9 @@ export default class FeedbackController extends BaseController {
   async updateStatus(@Params(['query']) params) {
     const { feedback_id: feedbackid, feedback_status: feedbackStatus } = params;
     const result = await this.feedbackService.updateStatus(feedbackid, feedbackStatus, this.ctx.db)
+    // 系统消息通知
+    const userInfo = await getUser(result.data, this.ctx.db)
+    await this.messageService.createMessage(userInfo.user_id, '意见反馈', `您发布的意见反馈已得到解决，快来体验吧。`, [userInfo.user_id], this.ctx.db);
     this.ctx.body = result
   }
 }
