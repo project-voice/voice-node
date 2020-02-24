@@ -4,6 +4,8 @@ import { Controller, BaseController, Inject, Get, Post, Params } from 'kever'
 export default class UserController extends BaseController {
   @Inject('user')
   private userService
+  @Inject('message')
+  private messageService
   @Post('/register')
   async register(@Params(['body']) params) {
     const result = await this.userService.register(params, this.ctx.db)

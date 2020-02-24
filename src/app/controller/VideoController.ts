@@ -1,4 +1,5 @@
 import { Controller, BaseController, Inject, Get, Post, Params } from 'kever'
+import { getUser } from '../service/common'
 
 @Controller('/video')
 export default class VideoController extends BaseController {
@@ -10,6 +11,8 @@ export default class VideoController extends BaseController {
   public supportService
   @Inject('comment')
   public commentService
+  @Inject('message')
+  public messageService
 
   @Get('/get-video-all')
   async getVideoListAll(@Params(['query']) params) {
@@ -68,7 +71,15 @@ export default class VideoController extends BaseController {
     const request = this.ctx.request as any;
     const video = request.files['video']
     const { user_id: userid, video_description: description } = params
+    // 发布视频
     const result = await this.videoService.releaseVideo(userid, description, video, this.ctx.db)
+    // 获取关注当前用户的列表
+    const followListPromise = this.userSevice.getFollowed(userid, this.ctx.db)
+    const userInfoPromises = getUser(userid, this.ctx.db)
+    const [followList, userInfo] = await Promise.all([followListPromise, userInfoPromises])
+    if (followList.length) {
+      await this.messageService.createMessage(userid, '短视频发布', `您关注的${userInfo.user_name}发布了新作品`, followList, this.ctx.db);
+    }
     this.ctx.body = result
   }
   @Get('/comment')

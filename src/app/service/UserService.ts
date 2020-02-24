@@ -150,4 +150,14 @@ export default class UserService implements UserInterface {
       })
     }
   }
+  async getFollowed(userid: number, db: any): Promise<any> {
+    try {
+      const selectSentence = 'select user_id from follow where followuser_id = ?'
+      const [rows, fileds] = await db.query(selectSentence, [userid])
+      const result = rows.map(item => item.user_id)
+      return result
+    } catch (err) {
+      return []
+    }
+  }
 }
