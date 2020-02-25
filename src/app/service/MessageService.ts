@@ -19,15 +19,18 @@ export default class MessageService implements MessageInterface {
         .sort((a, b) => a.create_time - b.create_time)
         .map(item => {
           let createTime = item.create_time
-          let [year, month, day] = new Date(+createTime).toJSON().split('T')[0].split('-')
-          let [nowYear, nowMonth, nowDay] = new Date().toJSON().split('T')[0].split('-')
+          let [year, month, day] = new Date(+createTime).toLocaleDateString().split('-')
+          let [nowYear, nowMonth, nowDay] = new Date().toLocaleDateString().split('-')
           let timeTxt: string | number = `${year}-${month}-${day}`;
-          if (year == nowYear && month == nowMonth && day == nowDay) {
-            const time = new Date(+createTime).toJSON().split('T')[1].split('.')[0]
-            timeTxt = `今天 ${time}`;
-          }
-          if (year == nowYear && month == nowMonth && (day + 1) == nowDay) {
-            timeTxt = '昨天'
+          if (year == nowYear && month == nowMonth) {
+            const time = new Date(+createTime).toLocaleTimeString()
+            if (+day == +nowDay) {
+              timeTxt = `今天 ${time}`;
+            }
+            if (((+day) + 1) == +nowDay) {
+              timeTxt = `昨天 ${time}`
+
+            }
           }
           return Object.assign({}, item, {
             create_time: timeTxt
