@@ -74,7 +74,6 @@ export default class MessageService implements MessageInterface {
       const insertSentence = 'insert into tips(user_id,tip_count) values(?,1)'
       const [rows, fileds] = await db.query(selectSentence, [userid])
       let flag;
-      console.log(rows)
       if (rows.length) {
         let result = await db.query(updateSentence, [Number(rows[0].tip_count) + 1, userid])
         flag = result[0]
