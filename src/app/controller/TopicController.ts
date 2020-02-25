@@ -48,7 +48,10 @@ export default class TopicController extends BaseController {
   async releaseTopic(@Params(['body']) params) {
     const request = this.ctx.request as any;
     let images = request.files['images[]'];
-    if (!Array.isArray(images)) {
+    console.log(images);
+    if (images === undefined) {
+      images = []
+    } else if (!Array.isArray(images)) {
       images = [images];
     }
     const { user_id: userid, topic_type: topicType, content } = params
