@@ -19,7 +19,7 @@ export default class MessageController extends BaseController {
     } else {
       result = {
         noerr: 0,
-        message: '您还未关注任何人',
+        message: '暂无系统消息',
         data: null
       }
     }
