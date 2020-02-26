@@ -81,7 +81,8 @@ export default class UserService implements UserInterface {
       const [rows, fields] = await db.query(updateSentence, [value, userid])
       if (rows.affectedRows) {
         return Object.assign({}, this.data, {
-          message: '修改成功'
+          message: '修改成功',
+          data: value
         })
       } else {
         throw new Error();

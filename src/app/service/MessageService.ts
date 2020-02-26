@@ -16,14 +16,14 @@ export default class MessageService implements MessageInterface {
       // 获取消息列表
       const messageList = rows
         .filter(item => followsid.includes(item.user_id))
-        .sort((a, b) => a.create_time - b.create_time)
+        .sort((a, b) => b.create_time - a.create_time)
         .map(item => {
           let createTime = item.create_time
           let [year, month, day] = new Date(+createTime).toLocaleDateString().split('-')
           let [nowYear, nowMonth, nowDay] = new Date().toLocaleDateString().split('-')
           let timeTxt: string | number = `${year}-${month}-${day}`;
           if (year == nowYear && month == nowMonth) {
-            const time = new Date(+createTime).toLocaleTimeString()
+            const time = new Date(+createTime).toLocaleTimeString().split(' ')[0]
             if (+day == +nowDay) {
               timeTxt = `今天 ${time}`;
             }
