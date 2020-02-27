@@ -30,12 +30,13 @@ export default class EmailService implements EmailInterface {
       redis.expire(userEmail, 10 * 60 * 30)
 
       return Object.assign({}, this.data, {
-        message: 'success',
+        message: '验证码发送成功',
         data: info
       })
     } catch (err) {
       return Object.assign({}, this.data, {
         noerr: 1,
+        message: '验证码发送失败',
         data: err
       })
     }

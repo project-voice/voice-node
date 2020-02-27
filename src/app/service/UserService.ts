@@ -162,4 +162,17 @@ export default class UserService implements UserInterface {
       return []
     }
   }
+  async emailToUser(email: string, db: any): Promise<boolean> {
+    try {
+      const selectSentence = 'select * from user where user_email = ?'
+      const [rows, fileds] = await db.query(selectSentence, [email])
+      if (rows.length) {
+        return true
+      }
+      return false
+    } catch (err) {
+      console.log(err)
+      return false
+    }
+  }
 }

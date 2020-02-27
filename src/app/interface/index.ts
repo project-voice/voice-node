@@ -68,6 +68,12 @@ export interface UserInterface {
    * @param db 
    */
   getFollowed(userid: number, db: any): Promise<any>
+  /**
+   * 通过邮箱查用户是否存在
+   * @param email 
+   * @param db 
+   */
+  emailToUser(email: string, db: any): Promise<boolean>
 }
 
 /**

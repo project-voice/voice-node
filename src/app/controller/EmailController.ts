@@ -10,7 +10,18 @@ export default class EmailController extends BaseController {
 
   @Get('/send-email')
   async sendEmail(@Params(['query']) params) {
-    const userEmail = params.user_email
+    const { user_email: userEmail, type } = params;
+    if (type == 'register') {
+      const isExist = await this.userService.emailToUser(userEmail, this.ctx.db)
+      if (isExist) {
+        this.ctx.body = {
+          noerr: 1,
+          message: '该邮箱已注册',
+          data: null
+        }
+        return;
+      }
+    }
     const result = await this.emailService.sendEmail(userEmail, this.ctx.redis)
     this.ctx.body = result
   }
