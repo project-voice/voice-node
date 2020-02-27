@@ -167,12 +167,12 @@ export default class UserService implements UserInterface {
       const selectSentence = 'select * from user where user_email = ?'
       const [rows, fileds] = await db.query(selectSentence, [email])
       if (rows.length) {
-        return true
+        return rows[0];
       }
-      return false
+      return null
     } catch (err) {
       console.log(err)
-      return false
+      return null
     }
   }
 }
