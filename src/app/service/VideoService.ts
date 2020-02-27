@@ -14,7 +14,6 @@ export default class VideService implements VideoInterface {
     try {
       const insertVideoSentence = `insert into video(user_id,video_url,video_description,create_time) values(?,?,?,?)`
       const [url] = await uploadOss('video', [video])
-      console.log('url', url);
       const createTime = Date.now()
       const [rows, fileds] = await ctx.db.query(insertVideoSentence, [userid, url, description, createTime])
       if (rows.affectedRows === 1) {
