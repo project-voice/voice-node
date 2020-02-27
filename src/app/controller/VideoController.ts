@@ -71,8 +71,6 @@ export default class VideoController extends BaseController {
     const request = this.ctx.request as any;
     const video = request.files['video']
     const { user_id: userid, video_description: description } = params
-    console.log(params);
-    console.log('video', video);
     // 发布视频
     const result = await this.videoService.releaseVideo(userid, description, video, this.ctx)
     // 发布系统通知
