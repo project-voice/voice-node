@@ -1,6 +1,6 @@
 import { Injectable } from 'kever'
 import { VideoInterface, ResultData } from '../interface';
-import { uploadOss, beforeTime } from '../utils';
+import { uploadOss, beforeTime, upload } from '../utils';
 import { getSupport, getUser, getCommentLen } from './common'
 
 @Injectable('video')
@@ -10,12 +10,13 @@ export default class VideService implements VideoInterface {
     message: '',
     data: null
   }
-  async releaseVideo(userid: number, description: string, video: File, db: any): Promise<ResultData> {
+  async releaseVideo(userid: number, description: string, video: File, ctx: any): Promise<ResultData> {
     try {
       const insertVideoSentence = `insert into video(user_id,video_url,video_description,create_time) values(?,?,?,?)`
       const [url] = await uploadOss('video', [video])
+      console.log('url', url);
       const createTime = Date.now()
-      const [rows, fileds] = await db.query(insertVideoSentence, [userid, url, description, createTime])
+      const [rows, fileds] = await ctx.db.query(insertVideoSentence, [userid, url, description, createTime])
       if (rows.affectedRows === 1) {
         return Object.assign({}, this.data, {
           message: '发布成功'

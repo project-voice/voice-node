@@ -1,11 +1,12 @@
 import * as OSS from 'ali-oss';
-import { writeFile, readFileSync } from 'fs'
+import { createWriteStream, createReadStream } from 'fs'
 
 const client = new OSS({
   region: 'oss-cn-beijing',
   accessKeyId: 'LTAI4Fog6hpirGjSxsMgfBd5',
   accessKeySecret: 'uKryPctQWPJQaCgdGF9F6SsSB4nsan',
-  bucket: 'kimvoice'
+  bucket: 'kimvoice',
+  timeout: 6000000
 })
 /**
  * 生成验证码
@@ -68,4 +69,13 @@ export const beforeTime = (time: number) => {
   }
   diff = Math.floor(diff / 12);
   return `${diff}年前`
+}
+
+export const upload = async (file: any) => {
+  const reader = await createReadStream(file.path);
+  const ext = file.name.split('.').pop();
+  const path = `/${Date.now()}.${ext}`;
+  const upStream = await createWriteStream(`upload${path}`);
+  await reader.pipe(upStream);
+  return `118.89.217.151/voice${path}`;
 }
