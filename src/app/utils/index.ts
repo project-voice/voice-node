@@ -32,8 +32,9 @@ export const uploadOss = async (dir: string, files: Array<File>) => {
   try {
     for (let i = 0; i < files.length; i++) {
       const file = files[i] as any;
-      const result = await client.put(`voice/${dir}/${file.name}`, file.path)
-      filesPath.push(result.url)
+      const { res } = await client.multipartUpload(`voice/${dir}/${file.name}`, file.path)
+      console.log(res)
+      filesPath.push(res.requestUrls[0].split('?')[0])
     }
     return filesPath
   } catch (err) {
