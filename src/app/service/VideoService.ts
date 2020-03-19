@@ -1,7 +1,6 @@
 import { Injectable } from 'kever'
 import { VideoInterface, ResultData } from '../interface';
-import { uploadOss, beforeTime } from '../utils';
-import { getSupport, getUser, getCommentLen } from './common'
+import { uploadOss } from '../utils';
 
 @Injectable('video')
 export default class VideService implements VideoInterface {
