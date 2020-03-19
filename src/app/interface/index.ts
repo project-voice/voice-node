@@ -7,6 +7,7 @@ export interface ResultData {
 export * from './EmailInterface'
 export * from './UserInterface'
 export * from './FollowInterface'
+export * from './FeedbackInterface'
 /**
  * 英语角主题相关接口service约束
  */
@@ -123,37 +124,6 @@ export interface CommentInterface {
    * @param db 
    */
   deleteComment(commentid: number, db): Promise<ResultData>
-}
-
-export interface FeedbackInterface {
-  /**
-   * 获取意见反馈列表
-   * @param db 
-   */
-  getFeedbackList(db: any): Promise<ResultData>
-  /**
-   * 发布一个意见
-   * @param userid 
-   * @param feedbackContent 
-   */
-  releaseFeedback(userid: number, feedbackContent: string, db: any): Promise<ResultData>
-  /**
-   * 删除一个意见
-   * @param feedbackid 
-   */
-  deleteFeedback(feedbackid: number, db: any): Promise<ResultData>
-  /**
-   * 更新意见的状态
-   * @param feedbackid 
-   * @param feedbackStatus 
-   */
-  updateStatus(feedbackid: number, feedbackStatus: number, db: any): Promise<ResultData>
-  /**
-   * 获取发布这条问题的用户id
-   * @param feedbackid 
-   * @param db 
-   */
-  getFeedback(feedbackid: number, db: any): Promise<any>
 }
 
 export interface MessageInterface {

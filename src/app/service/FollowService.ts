@@ -7,7 +7,7 @@ export default class FollowService implements followInterface {
     try {
       const insertFollowSentence = `insert into follow(user_id,followuser_id) values(?,?)`
       const [rows] = await db.query(insertFollowSentence, [userid, followid])
-      if (rows.affectedRows > 1) {
+      if (rows.affectedRows > 0) {
         return true
       }
     } catch (err) {
@@ -27,7 +27,7 @@ export default class FollowService implements followInterface {
     try {
       const deleteSentence = `delete from follow where user_id=? and followuser_id=?`
       const [rows, fileds] = await db.query(deleteSentence, [userid, followid])
-      if (rows.affectedRows > 1) {
+      if (rows.affectedRows > 0) {
         return true
       }
     } catch (err) {
