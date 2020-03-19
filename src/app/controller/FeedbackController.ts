@@ -6,8 +6,6 @@ import { createResultData } from '../utils';
 export default class FeedbackController extends BaseController {
   @Inject('feedback')
   public feedbackService;
-  @Inject('message')
-  public messageService;
   @Inject('user')
   public userService
 
@@ -80,9 +78,6 @@ export default class FeedbackController extends BaseController {
       if (!result) {
         throw new Error('更新失败')
       }
-      // 系统消息通知-意见反馈，自己通知给自己策略
-      const userInfo = await this.userService.findUser('user_id', result, this.ctx.db)
-      await this.messageService.createMessage(userInfo.user_id, '意见反馈', `您发布的意见反馈已得到解决，快来体验吧。`, [userInfo.user_id], this.ctx.db);
       resultData = createResultData({
         message: '更新成功'
       })

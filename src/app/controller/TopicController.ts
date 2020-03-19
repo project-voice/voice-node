@@ -11,8 +11,6 @@ export default class TopicController extends BaseController {
   public commentService
   @Inject('user')
   public userService
-  @Inject('message')
-  public messageService
 
   @Get('/get-topic-all')
   async getTopicAll(@Params(['query']) params) {
@@ -56,13 +54,6 @@ export default class TopicController extends BaseController {
     }
     const { user_id: userid, topic_type: topicType, content } = params
     const result = await this.topicService.releaseTopic(userid, topicType, content, images, this.ctx.db)
-    // 系统消息通知
-    const followListPromise = this.userService.getFollowed(userid, this.ctx.db)
-    const userInfoPromise = getUser(userid, this.ctx.db)
-    const [followList, userInfo] = await Promise.all([followListPromise, userInfoPromise])
-    if (followList.length) {
-      await this.messageService.createMessage(userid, '英语角发布', `您关注的${userInfo.user_name}发布了英语角话题,快来评论呀。`, followList, this.ctx.db);
-    }
     this.ctx.body = result
   }
 }

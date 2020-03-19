@@ -8,6 +8,7 @@ export * from './EmailInterface'
 export * from './UserInterface'
 export * from './FollowInterface'
 export * from './FeedbackInterface'
+export * from './MessageInterface'
 /**
  * 英语角主题相关接口service约束
  */
@@ -124,40 +125,4 @@ export interface CommentInterface {
    * @param db 
    */
   deleteComment(commentid: number, db): Promise<ResultData>
-}
-
-export interface MessageInterface {
-  /**
-   * 获取消息列表
-   * @param userid 
-   * @param db 
-   */
-  getMessageList(userid: number, followsid: Array<number>, db: any): Promise<ResultData>
-  /**
-   * 创建消息
-   * @param userid 
-   * @param title 
-   * @param content 
-   * @param db 
-   */
-  createMessage(userid: number, title: string, content: string, followList: Array<number>, db: any): Promise<any>
-  /**
-   * 创建消息提示数
-   * @param userid 
-   * @param db 
-   */
-  createTips(userid: number, db: any): Promise<any>
-  /**
-   * 获取消息提示数
-   * @param userid 
-   * @param db 
-   */
-  getTips(userid: number, db: any): Promise<any>
-  /**
-   * 已读，删除消息提示数
-   * @param userid 
-   * @param db 
-   */
-  deleteTips(userid: number, db: any): Promise<any>
-
 }

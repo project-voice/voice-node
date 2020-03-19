@@ -11,8 +11,6 @@ export default class VideoController extends BaseController {
   public supportService
   @Inject('comment')
   public commentService
-  @Inject('message')
-  public messageService
 
   @Get('/get-video-all')
   async getVideoListAll(@Params(['query']) params) {
@@ -73,13 +71,6 @@ export default class VideoController extends BaseController {
     const { user_id: userid, video_description: description } = params
     // 发布视频
     const result = await this.videoService.releaseVideo(userid, description, video, this.ctx)
-    // 发布系统通知
-    const followListPromise = this.userSevice.getFollowed(userid, this.ctx.db)
-    const userInfoPromise = getUser(userid, this.ctx.db)
-    const [followList, userInfo] = await Promise.all([followListPromise, userInfoPromise])
-    if (followList.length) {
-      await this.messageService.createMessage(userid, '短视频发布', `您关注的${userInfo.user_name}发布了短视频，快来看呀。`, followList, this.ctx.db);
-    }
     this.ctx.body = result
   }
   @Get('/comment')
