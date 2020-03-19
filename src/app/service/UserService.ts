@@ -1,178 +1,100 @@
 import { Injectable } from 'kever'
-import { UserInterface, ResultData } from '../interface'
+import { UserInterface } from '../interface'
 import { uploadOss } from '../utils'
-import { getUser } from './common'
 
 @Injectable('user')
 export default class UserService implements UserInterface {
-  private data: ResultData = {
-    noerr: 0,
-    message: '',
-    data: null
-  }
-  /**
-   * 注册
-   * @param params
-   * @param db
-   */
-  async register(params: any, db: any): Promise<ResultData> {
+  async login(platform: string, key: string, value: string, db: any): Promise<any> {
     try {
-      const { user_name: username, user_password: password, user_email: email } = params
-      const createTime = Date.now()
-      const insertSentence = `insert into user(user_name,user_password,user_email,create_time) values(?,?,?,?)`
-      const [rows, fields] = await db.query(insertSentence, [username, password, email, createTime])
-      // 自己关注自己
-      await this.follow(rows.insertId, rows.insertId, db);
-      return Object.assign({}, this.data, {
-        message: '注册成功'
-      })
-    } catch (err) {
-      return Object.assign({}, this.data, {
-        noerr: 1,
-        message: '注册失败',
-        data: err
-      })
-    }
-  }
-  /**
-   * 登录
-   * @param username
-   * @param email
-   * @param password
-   * @param db
-   */
-  async login(email: string, password: string, db: any): Promise<ResultData> {
-    try {
-      let querySentence = 'select * from `user` where `user_email` = ? and `user_password` = ?'
-      const [row, fields] = await db.query(querySentence, [email, password])
-      if (row.length) {
-        return Object.assign({}, this.data, {
-          message: '登录成功',
-          data: row[0]
-        })
+      let selectSentence;
+      if (platform === 'mobile') {
+        selectSentence = 'select * from user where user_email = ? and user_password = ?'
       } else {
-        return Object.assign({}, this.data, {
-          noerr: 1,
-          message: '您的邮箱或密码输入错误！'
-        })
+        selectSentence = 'select * from admins where user_name = ? and user_password = ?'
       }
+      const [rows] = await db.query(selectSentence, [key, value])
+      console.log(rows, key, value);
+      return rows[0]
     } catch (err) {
-      return Object.assign({}, this.data, {
-        noerr: 1,
-        message: '您的邮箱或密码输入错误！',
-        data: err
-      })
+      console.log(err)
+      return false
     }
   }
-  /**
-   * 找回密码
-   * @param userid
-   * @param password
-   * @param db
-   */
-  async updateInfo(userid: number, key: string, value: string | File, db: any): Promise<ResultData> {
+  async createUser(email: string, username: string, password: string, db: any): Promise<any> {
     try {
-      let filesPath;
+      const insertSentence = 'insert into user(user_email,user_name,user_password) values(?,?,?)'
+      const [rows] = await db.query(insertSentence, [email, username, password])
+      if (rows.affectedRows > 0) {
+        return true
+      }
+      return false
+    } catch (err) {
+      return false
+    }
+  }
+  async findUser(key: string, value: string, db: any): Promise<any> {
+    try {
+      const selectSentence = `select * from user where ${key} = ?`
+      const [rows] = await db.query(selectSentence, [value])
+      return rows[0]
+    } catch (err) {
+      return false
+    }
+  }
+  async updateUser(userId: number, key: string, value: string | File, db: any): Promise<any> {
+    try {
+      let filesPath
       if (key === 'user_image') {
         filesPath = await uploadOss('user', [value as File])
         value = filesPath[0]
       }
-      const updateSentence = `update user set ${key} = ? where user_id = ?`
-      const [rows, fields] = await db.query(updateSentence, [value, userid])
-      if (rows.affectedRows) {
-        return Object.assign({}, this.data, {
-          message: '修改成功',
-          data: value
-        })
-      } else {
-        throw new Error();
+      const updateSentence = `update user set ${key}=? where user_id = ?`
+      const [rows] = await db.query(updateSentence, [value, userId])
+      if (rows.affectedRows > 0) {
+        return value
       }
+      return false
     } catch (err) {
-      return Object.assign({}, this.data, {
-        noerr: 1,
-        message: '修改失败',
-        data: err
-      })
+      console.log(err);
+      return false
     }
   }
-  async follow(userid: number, followid: number, db: any): Promise<ResultData> {
+  async getUserList(db: any): Promise<any> {
     try {
-      const insertFollowSentence = `insert into follow(user_id,followuser_id) values(?,?)`
-      const [rows, fields] = await db.query(insertFollowSentence, [userid, followid])
-      if (rows.affectedRows == 1) {
-        return Object.assign({}, this.data, {
-          message: '关注成功'
-        })
-      } else {
-        throw new Error();
+      const selectSentence = 'select * from user'
+      const [rows] = await db.query(selectSentence)
+      return rows
+    } catch (err) {
+      return false
+    }
+  }
+  async disableUser(userId: number, db: any): Promise<any> {
+    try {
+      const isDisable = await this.isDisable(userId, db)
+      let value = 1
+      if (isDisable) {
+        value = 0
       }
-    } catch (err) {
-      return Object.assign({}, this.data, {
-        noerr: 1,
-        message: '关注失败',
-        data: err
-      })
-    }
-  }
-  async getFollowList(userid: number, db: any): Promise<ResultData> {
-    try {
-      const selectFollowSentence = `select followuser_id from follow where user_id = ?`
-      const [rows, fields] = await db.query(selectFollowSentence, [userid])
-      const followList: Array<number> = rows.reduce((list, item) => list.concat([item.followuser_id]), [])
-      const usersPromise = followList.map(userid => getUser(userid, db))
-      const usersInfo = await Promise.all(usersPromise)
-      return Object.assign({}, this.data, {
-        message: '获取列表成功',
-        data: usersInfo
-      })
-    } catch (err) {
-      return Object.assign({}, this.data, {
-        noerr: 1,
-        message: '获取列表失败',
-        data: err
-      })
-    }
-  }
-  async cancelFollow(userid: number, followid: number, db: any): Promise<ResultData> {
-    try {
-      const deleteSentence = `delete from follow where user_id=? and followuser_id=?`
-      const [rows, fileds] = await db.query(deleteSentence, [userid, followid])
-      if (rows.affectedRows === 1) {
-        return Object.assign({}, this.data, {
-          message: '取消成功'
-        })
-      } else {
-        throw new Error()
+      const updateSentence = 'update user set user_status = ? where user_id = ?'
+      const [rows] = await db.query(updateSentence, [value, userId])
+      if (rows.affectedRows > 0) {
+        return true
       }
+      return false
     } catch (err) {
-      return Object.assign({}, this.data, {
-        noerr: 1,
-        message: '取消失败',
-        data: err
-      })
+      return false
     }
   }
-  async getFollowed(userid: number, db: any): Promise<any> {
+  async isDisable(userId: number, db: any): Promise<any> {
     try {
-      const selectSentence = 'select user_id from follow where followuser_id = ?'
-      const [rows, fileds] = await db.query(selectSentence, [userid])
-      const result = rows.map(item => item.user_id)
-      return result
-    } catch (err) {
-      return []
-    }
-  }
-  async emailToUser(email: string, db: any): Promise<boolean> {
-    try {
-      const selectSentence = 'select * from user where user_email = ?'
-      const [rows, fileds] = await db.query(selectSentence, [email])
-      if (rows.length) {
-        return rows[0];
+      const selectSentence = 'select user_status from user where user_id = ?'
+      const [rows] = await db.query(selectSentence, [userId])
+      if (rows[0].user_status == 0) {
+        return false
       }
-      return null
+      return true
     } catch (err) {
-      console.log(err)
-      return null
+      return false
     }
   }
 }

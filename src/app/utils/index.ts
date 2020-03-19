@@ -1,5 +1,6 @@
 import * as OSS from 'ali-oss';
 import { createWriteStream, createReadStream } from 'fs'
+import { ResultData } from '../interface';
 
 const client = new OSS({
   region: 'oss-cn-beijing',
@@ -72,11 +73,15 @@ export const beforeTime = (time: number) => {
   return `${diff}年前`
 }
 
-export const upload = async (file: any) => {
-  const reader = await createReadStream(file.path);
-  const ext = file.name.split('.').pop();
-  const path = `/${Date.now()}.${ext}`;
-  const upStream = await createWriteStream(`upload${path}`);
-  await reader.pipe(upStream);
-  return `118.89.217.151/voice${path}`;
+
+const resultData: ResultData = {
+  noerr: 0,
+  message: '',
+  data: null
 }
+interface IData {
+  noerr?: number
+  message: string
+  data?: {} | null
+}
+export const createResultData = (data: IData): ResultData => Object.assign({}, resultData, data)
