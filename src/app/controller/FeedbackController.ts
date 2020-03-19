@@ -86,8 +86,6 @@ export default class FeedbackController extends BaseController {
         message: err.message
       })
     }
-
-
     this.ctx.body = resultData
   }
 }

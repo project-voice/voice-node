@@ -10,35 +10,8 @@ export * from './FollowInterface'
 export * from './FeedbackInterface'
 export * from './MessageInterface'
 export * from './CommentInterface'
-/**
- * 英语角主题相关接口service约束
- */
-export interface TopicInterface {
-  /**
-   * 获取所有主题的发文
-   * @param actionUserid 
-   * @param page 
-   * @param count 
-   */
-  getTopicAll(actionUserid: number, page: number, count: number, db: any): Promise<ResultData>
-  /**
-   * 获取特定主题的发文
-   * @param actionUserid
-   * @param type 
-   * @param page 
-   * @param count 
-   */
-  getTopic(actionUserid: number, topicType: string, page: number, count: number, db: any): Promise<ResultData>
-
-  /**
-   * 发布主题
-   * @param userid 
-   * @param topicType 
-   * @param content 
-   * @param images 
-   */
-  releaseTopic(userid: number, topicType: string, content: string, images: Array<File>, db: any): Promise<ResultData>
-}
+export * from './SupportInterface'
+export * from './TopicInterface'
 
 /**
  * 短视频相关接口service约束
@@ -87,16 +60,5 @@ export interface VideoInterface {
    * @param db 
    */
   normalVideoList(videos: Array<any>, followList: Array<number>, actionUserid: number, db: any): Promise<Array<any>>
-}
-
-export interface SupportInterface {
-  /**
-   * 通用点赞接口
-   * @param userid 
-   * @param topicid 
-   * @param supportType 
-   * @param db 
-   */
-  support(userid: number, topicid: number, supportType: number, db: any): Promise<ResultData>
 }
 
