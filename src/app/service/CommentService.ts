@@ -1,7 +1,6 @@
 import { Injectable } from 'kever'
-import { CommentInterface, ResultData } from '../interface';
+import { CommentInterface } from '../interface';
 import { beforeTime } from '../utils'
-import { getUser } from './common'
 
 @Injectable('comment')
 export default class CommentService implements CommentInterface {
