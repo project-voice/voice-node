@@ -1,5 +1,4 @@
 import { Controller, BaseController, Inject, Get, Params, Post } from 'kever';
-import { getUser } from '../service/common';
 import { createResultData } from '../utils';
 
 @Controller('/feedback')

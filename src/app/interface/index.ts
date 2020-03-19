@@ -9,6 +9,7 @@ export * from './UserInterface'
 export * from './FollowInterface'
 export * from './FeedbackInterface'
 export * from './MessageInterface'
+export * from './CommentInterface'
 /**
  * 英语角主题相关接口service约束
  */
@@ -99,30 +100,3 @@ export interface SupportInterface {
   support(userid: number, topicid: number, supportType: number, db: any): Promise<ResultData>
 }
 
-export interface CommentInterface {
-  /**
-   * 评论
-   * @param releaseid 
-   * @param topicid 
-   * @param userid 
-   * @param commentContent 
-   * @param commentType 
-   * @param db 
-   */
-  comment(releaseid: number, topicid: number, userid: number, commentContent: string, commentType: number, db: any): Promise<ResultData>
-  /**
-   * 获取评论列表
-   * @param topicid 
-   * @param commentType 
-   * @param page 
-   * @param count 
-   * @param db 
-   */
-  getCommentList(topicid: number, commentType: number, page: number, count: number, db: any): Promise<ResultData>
-  /**
-   * 评论删除
-   * @param commentid 
-   * @param db 
-   */
-  deleteComment(commentid: number, db): Promise<ResultData>
-}

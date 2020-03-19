@@ -5,86 +5,55 @@ import { getUser } from './common'
 
 @Injectable('comment')
 export default class CommentService implements CommentInterface {
-  private data: ResultData = {
-    noerr: 0,
-    message: '',
-    data: null
-  }
-  async comment(releaseid: number, topicid: number, userid: number, commentContent: string, commentType: number, db): Promise<ResultData> {
+  async comment(releaseid: number, topicid: number, userid: number, commentContent: string, commentType: number, db): Promise<any> {
     try {
       const insertCommentSentence = `insert into comment(release_id,topic_id,user_id,comment_content,create_time,comment_type) values(?,?,?,?,?,?)`
       const createTime = Date.now();
-      const [rows, fileds] = await db.query(insertCommentSentence, [releaseid, topicid, userid, commentContent, createTime, commentType])
-      if (rows.affectedRows === 1) {
-        return Object.assign({}, this.data, {
-          message: '评论成功'
-        })
-      } else {
-        throw new Error();
+      const [rows] = await db.query(insertCommentSentence, [releaseid, topicid, userid, commentContent, createTime, commentType])
+      if (rows.affectedRows > 0) {
+        return true
       }
+      return false
     } catch (err) {
-      return Object.assign({}, this.data, {
-        noerr: 1,
-        message: '评论失败'
-      })
+      return false
     }
   }
-  async getCommentList(topicid: number, commentType: number, page: number, count: number, db): Promise<ResultData> {
+  async getCommentList(topicid: number, commentType: number, page: number, count: number, db): Promise<any> {
     try {
-      const selectCommentSentence = `select * from comment where topic_id = ? and comment_type=?`
-      let [rows, fileds] = await db.query(selectCommentSentence, [topicid, commentType])
-      rows.sort((a, b) => b.create_time - a.create_time)
-      const maxCount = rows.length;
-      // 分页
-      rows = rows.slice((page - 1) * count, page * count);
+      const selectCommentSentence = `select * from comment where topic_id = ? and comment_type= ? limit ${(page - 1) * count}, ${count} order by create_time desc`
+      let [rows] = await db.query(selectCommentSentence, [topicid, commentType])
       for (let comment of rows) {
-        const releaseid = comment.release_id
-        const userid = comment.user_id
         let createTime = comment.create_time
         createTime = beforeTime(createTime)
-        const releaseInfoPromise = getUser(releaseid, db)
-        const userInfoPromise = getUser(userid, db)
-        const [releaseInfo, userInfo] = await Promise.all([releaseInfoPromise, userInfoPromise])
         Object.assign(comment, {
           create_time: createTime,
-          user_name: userInfo.user_name,
-          user_image: userInfo.user_image,
-          release_name: releaseInfo.user_name
         })
       }
-      return Object.assign({}, this.data, {
-        message: '获取评论列表成功',
-        data: {
-          count: maxCount,
-          list: rows
-        }
-      })
+      return rows;
     } catch (err) {
       console.log(err);
-      return Object.assign({}, this.data, {
-        noerr: 1,
-        message: '获取评论列表失败'
-      })
+      return false
     }
   }
-  async deleteComment(commentid: number, db): Promise<ResultData> {
+  async deleteComment(commentType: number, targetId: number, db): Promise<any> {
     try {
-      const deleteSentence = `delete from comment where comment_id = ?`
-      const [rows, fileds] = await db.query(deleteSentence, [commentid])
-      if (rows.affectedRows === 1) {
-        return Object.assign({}, this.data, {
-          message: '删除成功'
-        })
-      } else {
-        throw new Error()
+      const deleteSentence = `delete from comment where comment_type = ? and topic_id = ?`
+      const [rows] = await db.query(deleteSentence, [commentType, targetId])
+      if (rows.affectedRows > 0) {
+        return true
       }
+      return false
     } catch (err) {
-      return Object.assign({}, this.data, {
-        noerr: 1,
-        message: '删除失败',
-        data: err,
-      })
+      return true
     }
-
+  }
+  async getCommentCount(commentType: number, targetId: number, db: any): Promise<any> {
+    try {
+      const selectSentence = 'select * from comment where comment_type = ? and topic_id = ?'
+      const [rows] = await db.query(selectSentence, [commentType, targetId])
+      return rows.length
+    } catch (err) {
+      return false
+    }
   }
 }
