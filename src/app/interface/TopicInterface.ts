@@ -37,6 +37,13 @@ export interface TopicInterface {
    */
   deleteTopic(topicId: number, db: any): Promise<any>
   /**
+   * 获取该用户发布的话题
+   * @param userId 
+   * @param db 
+   */
+  getTopicListToSelf(userId: number, db: any): Promise<any>
+
+  /**
    * 禁/启 用话题
    * @param topicId 
    * @param db 

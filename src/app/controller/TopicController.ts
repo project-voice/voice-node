@@ -1,5 +1,5 @@
 import { Controller, BaseController, Inject, Get, Params, Post, Req } from 'kever'
-import { getUser } from '../service/common'
+import { createResultData, beforeTime } from '../utils'
 
 @Controller('/topic')
 export default class TopicController extends BaseController {
@@ -12,17 +12,180 @@ export default class TopicController extends BaseController {
   @Inject('user')
   public userService
 
-  @Get('/get-topic-all')
-  async getTopicAll(@Params(['query']) params) {
-    const { user_id: userid, page, count } = params
-    const result = await this.topicService.getTopicAll(userid, page, count, this.ctx.db)
-    this.ctx.body = result
+  @Get('/get-topic-all-first')
+  async getTopicAllToFirst(@Params(['query']) params) {
+    let resultData
+    try {
+      const { user_id: userId, count } = params
+      const result = await this.topicService.getTopicAllToFirst(count, this.ctx.db)
+      let processTopics = result.map(topics => {
+        return topics.map(async topic => {
+          // 获取用户信息、点赞数、评论数
+          const userInfoPromise = this.userService.findUser('user_id', topic.user_id, this.ctx.db)
+          const commentCountPromise = this.commentService.getCommentCount(1, topic.topic_id, this.ctx.db)
+          const supportPromise = this.supportService.getSupport(1, userId, topic.topic_id, this.ctx.db)
+          const [userInfo, commentCount, support] = await Promise.all([userInfoPromise, commentCountPromise, supportPromise])
+          const createTime = beforeTime(topic.create_time)
+          return Object.assign(topic, {
+            user_name: userInfo.user_name,
+            user_image: userInfo.user_image,
+            create_time: createTime,
+            comment: commentCount,
+            support
+          })
+        })
+      })
+      resultData = createResultData({
+        message: '获取成功',
+        data: processTopics
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
+    }
+    this.ctx.body = resultData
   }
   @Get('/get-topic')
   async getTopic(@Params(['query']) params) {
-    const { user_id: userid, topic_type: typeType, page, count } = params;
-    const result = await this.topicService.getTopic(userid, typeType, page, count, this.ctx.db)
-    this.ctx.body = result
+    let resultData
+    try {
+      const { user_id: userId, topic_type: typeType, page, count } = params;
+      const result = await this.topicService.getTopic(typeType, page, count, this.ctx.db)
+      const processTopics = result.map(async topic => {
+        // 获取用户信息、点赞数、评论数
+        const userInfoPromise = this.userService.findUser('user_id', topic.user_id, this.ctx.db)
+        const commentCountPromise = this.commentService.getCommentCount(1, topic.topic_id, this.ctx.db)
+        const supportPromise = this.supportService.getSupport(1, userId, topic.topic_id, this.ctx.db)
+        const [userInfo, commentCount, support] = await Promise.all([userInfoPromise, commentCountPromise, supportPromise])
+        const createTime = beforeTime(topic.create_time)
+        return Object.assign(topic, {
+          user_name: userInfo.user_name,
+          user_image: userInfo.user_image,
+          create_time: createTime,
+          comment: commentCount,
+          support
+        })
+      })
+      resultData = createResultData({
+        message: '获取成功',
+        data: processTopics
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
+    }
+    this.ctx.body = resultData
+  }
+  @Get('/topic-list')
+  async getTopicList(@Params(['query']) params) {
+    let resultData
+    try {
+      const { page, count } = params
+      const result = await this.topicService.getTopicAll(page, count, this.ctx.db)
+      const processTopics = result.map(async topic => {
+        // 获取用户信息、点赞数、评论数
+        const userInfoPromise = this.userService.findUser('user_id', topic.user_id, this.ctx.db)
+        const commentCountPromise = this.commentService.getCommentCount(1, topic.topic_id, this.ctx.db)
+        const supportPromise = this.supportService.getSupport(1, 0, topic.topic_id, this.ctx.db)
+        const [userInfo, commentCount, support] = await Promise.all([userInfoPromise, commentCountPromise, supportPromise])
+        const createTime = beforeTime(topic.create_time)
+        return Object.assign(topic, {
+          user_name: userInfo.user_name,
+          user_image: userInfo.user_image,
+          create_time: createTime,
+          comment: commentCount,
+          support
+        })
+      })
+      resultData = createResultData({
+        message: '获取成功',
+        data: processTopics
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
+    }
+    this.ctx.body = resultData
+  }
+  @Get('/topic-self-list')
+  async getTopicListToSelf(@Params(['query']) params) {
+    let resultData
+    try {
+      const { user_id: userId } = params
+      const result = await this.topicService.getTopicToSelf(userId, this.ctx.db)
+      const processTopics = result.map(async topic => {
+        // 获取用户信息、点赞数、评论数
+        const userInfoPromise = this.userService.findUser('user_id', topic.user_id, this.ctx.db)
+        const commentCountPromise = this.commentService.getCommentCount(1, topic.topic_id, this.ctx.db)
+        const supportPromise = this.supportService.getSupport(1, userId, topic.topic_id, this.ctx.db)
+        const [userInfo, commentCount, support] = await Promise.all([userInfoPromise, commentCountPromise, supportPromise])
+        const createTime = beforeTime(topic.create_time)
+        return Object.assign(topic, {
+          user_name: userInfo.user_name,
+          user_image: userInfo.user_image,
+          create_time: createTime,
+          comment: commentCount,
+          support
+        })
+      })
+      resultData = createResultData({
+        message: '获取成功',
+        data: processTopics
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
+    }
+    this.ctx.body = resultData
+  }
+  @Get('/delete-topic')
+  async deleteTopic(@Params(['query']) params) {
+    let resultData
+    try {
+      const { topic_id: topicId } = params
+      const topicResult = await this.topicService.deleteTopic(topicId, this.ctx.db)
+      // 删除话题对应的评论
+      const commentResult = await this.commentService.deleteComment(1, topicId, this.ctx.db)
+      // 删除话题对应的点赞
+      const supportResult = await this.supportService.deleteSupport(1, topicId, this.ctx.db)
+      resultData = createResultData({
+        message: '删除成功'
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
+    }
+    this.ctx.body = resultData
+  }
+  @Get('/disable')
+  async disableTopic(@Params(['query']) params) {
+    let resultData
+    try {
+      const { topic_id: topicId } = params
+      const result = this.topicService.disableTopic(topicId, this.ctx.db)
+      if (!result) {
+        throw new Error('请求失败')
+      }
+      resultData = createResultData({
+        message: '请求成功'
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
+    }
+    this.ctx.body = resultData
   }
   @Get('/support')
   async support(@Params(['query']) params) {

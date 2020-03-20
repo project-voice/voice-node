@@ -4,7 +4,7 @@ import { uploadOss } from '../utils'
 
 @Injectable('topic')
 export default class TopicService implements TopicInterface {
-  async getTopicAllToFirst(page: number, count: number, db): Promise<any> {
+  async getTopicAllToFirst(count: number, db): Promise<any> {
     try {
       const selectVoiceSentence = `select * from topic order by create_time desc`
       const [rows] = await db.query(selectVoiceSentence)
@@ -76,6 +76,15 @@ export default class TopicService implements TopicInterface {
     try {
       const selectSentence = `select * from topic limit ${(page - 1) * count}, ${count}`
       const [rows] = await db.query(selectSentence)
+      return rows
+    } catch (err) {
+      return false
+    }
+  }
+  async getTopicListToSelf(userId: number, db: any): Promise<any> {
+    try {
+      const selectSentence = 'select * from topic where user_id = ?'
+      const [rows] = await db.query(selectSentence, [userId])
       return rows
     } catch (err) {
       return false
