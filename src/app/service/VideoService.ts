@@ -40,6 +40,15 @@ export default class VideService implements VideoInterface {
       return false
     }
   }
+  async videoToSelf(userId: number, db: any): Promise<any> {
+    try {
+      const selectSentence = 'select * form video where user_id = ? order by create_time desc'
+      const [videos] = await db.query(selectSentence, [userId])
+      return videos
+    } catch (err) {
+      return false
+    }
+  }
   async share(videoid: number, db: any): Promise<any> {
     try {
       const updateShareSentence = `update video set video_share=? where video_id=?`

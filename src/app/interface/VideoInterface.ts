@@ -20,6 +20,12 @@ export interface VideoInterface {
    */
   getVideoListRecommend(db: any): Promise<any>
   /**
+   * 获取特定用户发布的视频
+   * @param userId 
+   * @param db 
+   */
+  videoToSelf(userId: number, db: any): Promise<any>
+  /**
    * 分享
    * @param videoid 
    * @param db 

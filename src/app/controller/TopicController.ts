@@ -146,7 +146,7 @@ export default class TopicController extends BaseController {
     }
     this.ctx.body = resultData
   }
-  @Get('/delete-topic')
+  @Get('/delete')
   async deleteTopic(@Params(['query']) params) {
     let resultData
     try {
