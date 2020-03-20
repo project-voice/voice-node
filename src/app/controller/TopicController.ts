@@ -189,34 +189,97 @@ export default class TopicController extends BaseController {
   }
   @Get('/support')
   async support(@Params(['query']) params) {
-    const { topic_id: topicid, user_id: userid } = params
-    const result = await this.supportService.support(userid, topicid, 1, this.ctx.db)
-    this.ctx.body = result
+    let resultData
+    try {
+      const { topic_id: topicId, user_id: userId } = params
+      const result = await this.supportService.support(userId, topicId, 1, this.ctx.db)
+      if (!result) {
+        throw new Error('请求失败')
+      }
+      resultData = createResultData({
+        message: '请求成功',
+        data: result
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
+    }
+    this.ctx.body = resultData
   }
-  @Get('/comment')
+  @Post('/comment')
   async comment(@Params(['query']) params) {
-    const { release_id: releaseid, topic_id: topicid, user_id: userid, comment_content: commentContent } = params
-    const result = await this.commentService.comment(releaseid, topicid, userid, commentContent, 1, this.ctx.db)
-    this.ctx.body = result
+    let resultData
+    try {
+      const { topic_id: topicid, user_id: userid, comment_content: commentContent } = params
+      const result = await this.commentService.comment(topicid, userid, commentContent, 1, this.ctx.db)
+      if (!result) {
+        throw new Error('评论失败')
+      }
+      resultData = createResultData({
+        message: '评论成功'
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
+    }
+
+    this.ctx.body = resultData
   }
   @Get('/comment-list')
   async getCommentList(@Params(['query']) params) {
-    const { topic_id: topicid, page, count } = params
-    const result = await this.commentService.getCommentList(topicid, 1, page, count, this.ctx.db);
-    this.ctx.body = result;
+    let resultData
+    try {
+      const { topic_id: topicid, page, count } = params
+      const result = await this.commentService.getCommentList(topicid, 1, page, count, this.ctx.db);
+      const processComment = result.map(async (comment) => {
+        const userInfo = await this.userService.findUser('user_id', comment.user_id, this.ctx.db)
+        return Object.assign(comment, {
+          user_name: userInfo.user_name,
+          user_image: userInfo.user_image
+        })
+      })
+      resultData = createResultData({
+        message: '请求成功',
+        data: processComment
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
+    }
+    this.ctx.body = resultData;
   }
   @Post('/release-topic')
   async releaseTopic(@Params(['body']) params) {
-    const request = this.ctx.request as any;
-    let images = request.files['images[]'];
-    console.log(images);
-    if (images === undefined) {
-      images = []
-    } else if (!Array.isArray(images)) {
-      images = [images];
+    let resultData
+    try {
+      const request = this.ctx.request as any;
+      let images = request.files['images[]'];
+      if (images === undefined) {
+        images = []
+      } else if (!Array.isArray(images)) {
+        images = [images];
+      }
+      const { user_id: userid, topic_type: topicType, content } = params
+      const result = await this.topicService.releaseTopic(userid, topicType, content, images, this.ctx.db)
+      if (!result) {
+        throw new Error('发布失败')
+      }
+      resultData = createResultData({
+        message: '发布成功'
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
     }
-    const { user_id: userid, topic_type: topicType, content } = params
-    const result = await this.topicService.releaseTopic(userid, topicType, content, images, this.ctx.db)
-    this.ctx.body = result
+
+    this.ctx.body = resultData
   }
 }

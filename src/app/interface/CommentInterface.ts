@@ -1,14 +1,13 @@
 export interface CommentInterface {
   /**
    * 评论
-   * @param releaseid 
    * @param topicid 
    * @param userid 
    * @param commentContent 
    * @param commentType 
    * @param db 
    */
-  comment(releaseid: number, topicid: number, userid: number, commentContent: string, commentType: number, db: any): Promise<any>
+  comment(topicid: number, userid: number, commentContent: string, commentType: number, db): Promise<any>
   /**
    * 获取评论列表
    * @param topicid 

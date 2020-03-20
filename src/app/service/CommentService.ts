@@ -4,11 +4,11 @@ import { beforeTime } from '../utils'
 
 @Injectable('comment')
 export default class CommentService implements CommentInterface {
-  async comment(releaseid: number, topicid: number, userid: number, commentContent: string, commentType: number, db): Promise<any> {
+  async comment(topicid: number, userid: number, commentContent: string, commentType: number, db): Promise<any> {
     try {
-      const insertCommentSentence = `insert into comment(release_id,topic_id,user_id,comment_content,create_time,comment_type) values(?,?,?,?,?,?)`
+      const insertCommentSentence = `insert into comment(topic_id,user_id,comment_content,create_time,comment_type) values(?,?,?,?,?)`
       const createTime = Date.now();
-      const [rows] = await db.query(insertCommentSentence, [releaseid, topicid, userid, commentContent, createTime, commentType])
+      const [rows] = await db.query(insertCommentSentence, [topicid, userid, commentContent, createTime, commentType])
       if (rows.affectedRows > 0) {
         return true
       }
