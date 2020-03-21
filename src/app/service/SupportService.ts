@@ -5,7 +5,7 @@ import { SupportInterface } from '../interface'
 export default class SupportService implements SupportInterface {
   async getSupport(supportType: number, userId: number, targetId: number, db: any): Promise<any> {
     try {
-      const selectSentence = 'select * from support where support_type = ? ande topic_id = ?'
+      const selectSentence = 'select * from support where support_type = ? and topic_id = ?'
       const checkPromise = this.checkUser(supportType, userId, targetId, db)
       const supportListPromise = db.query(selectSentence, [supportType, targetId])
       const [checked, supportList] = await Promise.all([checkPromise, supportListPromise])

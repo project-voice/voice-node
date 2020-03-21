@@ -19,7 +19,7 @@ export default class CommentService implements CommentInterface {
   }
   async getCommentList(topicid: number, commentType: number, page: number, count: number, db): Promise<any> {
     try {
-      const selectCommentSentence = `select * from comment where topic_id = ? and comment_type= ? limit ${(page - 1) * count}, ${count} order by create_time desc`
+      const selectCommentSentence = `select * from comment where topic_id = ? and comment_type= ?  order by create_time desc limit ${(page - 1) * count}, ${count}`
       let [rows] = await db.query(selectCommentSentence, [topicid, commentType])
       for (let comment of rows) {
         let createTime = comment.create_time

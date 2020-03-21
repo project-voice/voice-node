@@ -36,10 +36,10 @@ export default class FollowController extends BaseController {
       if (!result) {
         throw new Error('获取失败')
       }
-      result = result.filter(user => user.user_id != userId)
-      // TODO 获取用户信息
+      result = result.filter(user => user.followuser_id != userId)
+      //  获取用户信息
       const userInfoPromise = result.map(user => {
-        return this.userService.findUser('user_id', user.user_id, this.ctx.db)
+        return this.userService.findUser('user_id', user.followuser_id, this.ctx.db)
       })
       const userInfo = await Promise.all(userInfoPromise)
       resultData = createResultData({

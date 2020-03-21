@@ -1,5 +1,5 @@
 import { Controller, BaseController, Inject, Get, Post, Params } from 'kever'
-import { createResultData } from '../utils'
+import { createResultData, beforeTime } from '../utils'
 
 @Controller('/video')
 export default class VideoController extends BaseController {
@@ -19,20 +19,49 @@ export default class VideoController extends BaseController {
     let resultData
     try {
       const { user_id: userId } = params
-      const followList = this.followService.getFollowList(userId, this.ctx.body)
-      const followsUserId = followList.map(user => user.user_id)
+      const followList = await this.followService.getFollowList(userId, this.ctx.db)
+      const followsUserId = followList.map(user => user.followuser_id)
       const followVideosPromise = this.videoService.getVideoListFollow(followsUserId, this.ctx.db)
       const recommendVideosPromise = this.videoService.getVideoListRecommend(this.ctx.db)
       let [followVideos, recommendVideo] = await Promise.all([followVideosPromise, recommendVideosPromise])
-      followVideos = followVideos.map(video => {
-        return Object.assign(video, {
+      const follow = []
+      const recommend = []
+      for (let video of followVideos) {
+        const userInfoPromise = this.userService.findUser('user_id', video.user_id, this.ctx.db)
+        const commentCountPromise = this.commentService.getCommentCount(0, video.video_id, this.ctx.db)
+        const supportPromise = this.supportService.getSupport(0, userId, video.video_id, this.ctx.db)
+        const [userInfo, commentCount, support] = await Promise.all([userInfoPromise, commentCountPromise, supportPromise])
+        const createTime = beforeTime(video.create_time)
+        follow.push(Object.assign(video, {
+          user_name: userInfo.user_name,
+          user_image: userInfo.user_image,
+          create_time: createTime,
+          comment: commentCount,
+          support,
           follow: true
-        })
-      })
-      recommendVideo = recommendVideo.map(video => {
-        return Object.assign(video, {
+        }))
+      }
+      for (let video of recommendVideo) {
+        const userInfoPromise = this.userService.findUser('user_id', video.user_id, this.ctx.db)
+        const commentCountPromise = this.commentService.getCommentCount(0, video.video_id, this.ctx.db)
+        const supportPromise = this.supportService.getSupport(0, userId, video.video_id, this.ctx.db)
+        const [userInfo, commentCount, support] = await Promise.all([userInfoPromise, commentCountPromise, supportPromise])
+        const createTime = beforeTime(video.create_time)
+        recommend.push(Object.assign(video, {
+          user_name: userInfo.user_name,
+          user_image: userInfo.user_image,
+          create_time: createTime,
+          comment: commentCount,
+          support,
           follow: followsUserId.includes(video.user_id)
-        })
+        }))
+      }
+      resultData = createResultData({
+        message: '请求成功',
+        data: {
+          follow: follow,
+          recommend: recommend
+        }
       })
     } catch (err) {
       resultData = createResultData({
@@ -47,6 +76,21 @@ export default class VideoController extends BaseController {
     let resultData
     try {
       const result = await this.videoService.getVideoListRecommend(this.ctx.db)
+      let processResult = []
+      for (let video of result) {
+        const userInfoPromise = this.userService.findUser('user_id', video.user_id, this.ctx.db)
+        const commentCountPromise = this.commentService.getCommentCount(0, video.video_id, this.ctx.db)
+        const supportPromise = this.supportService.getSupport(0, 0, video.video_id, this.ctx.db)
+        const [userInfo, commentCount, support] = await Promise.all([userInfoPromise, commentCountPromise, supportPromise])
+        const createTime = beforeTime(video.create_time)
+        processResult.push(Object.assign(video, {
+          user_name: userInfo.user_name,
+          user_image: userInfo.user_image,
+          create_time: createTime,
+          comment: commentCount,
+          support,
+        }))
+      }
       if (!result) {
         throw new Error('请求失败')
       }
@@ -68,6 +112,21 @@ export default class VideoController extends BaseController {
     try {
       const { user_id: userId } = params
       const result = await this.videoService.videoToSelf(userId, this.ctx.db)
+      let processResult = []
+      for (let video of result) {
+        const userInfoPromise = this.userService.findUser('user_id', video.user_id, this.ctx.db)
+        const commentCountPromise = this.commentService.getCommentCount(0, video.video_id, this.ctx.db)
+        const supportPromise = this.supportService.getSupport(0, userId, video.video_id, this.ctx.db)
+        const [userInfo, commentCount, support] = await Promise.all([userInfoPromise, commentCountPromise, supportPromise])
+        const createTime = beforeTime(video.create_time)
+        processResult.push(Object.assign(video, {
+          user_name: userInfo.user_name,
+          user_image: userInfo.user_image,
+          create_time: createTime,
+          comment: commentCount,
+          support,
+        }))
+      }
       if (!result) {
         throw new Error('请求失败')
       }
@@ -123,29 +182,6 @@ export default class VideoController extends BaseController {
     }
     this.ctx.body = resultData
   }
-
-  @Get('/support')
-  async support(@Params(['query']) params) {
-    let resultData
-    try {
-      const { user_id: userId, video_id: videoId } = params
-      const result = await this.supportService.support(userId, videoId, 0, this.ctx.db)
-      if (!result) {
-        throw new Error('请求失败')
-      }
-      resultData = createResultData({
-        message: '请求成功',
-        data: result
-      })
-    } catch (err) {
-      resultData = createResultData({
-        noerr: 1,
-        message: err.message
-      })
-    }
-
-    this.ctx.body = resultData
-  }
   @Post('/release-video')
   async releaseVideo(@Params(['body']) params) {
     let resultData
@@ -171,52 +207,6 @@ export default class VideoController extends BaseController {
 
     this.ctx.body = resultData
   }
-  @Get('/comment')
-  async comment(@Params(['query']) params) {
-    let resultData
-    try {
-      const { video_id: videoid, user_id: userid, comment_content: commentContent } = params
-      const result = await this.commentService.comment(videoid, userid, commentContent, 0, this.ctx.db)
-      if (!result) {
-        throw new Error('评论失败')
-      }
-      createResultData({
-        message: '评论成功'
-      })
-    } catch (err) {
-      resultData = createResultData({
-        noerr: 1,
-        message: err.message
-      })
-    }
-
-    this.ctx.body = resultData
-  }
-  @Get('/comment-list')
-  async getCommentList(@Params(['query']) params) {
-    let resultData
-    try {
-      const { video_id: videoid, page, count } = params
-      const result = await this.commentService.getCommentList(videoid, 0, page, count, this.ctx.db);
-      const processComment = result.map(async (comment) => {
-        const userInfo = await this.userService.findUser('user_id', comment.user_id, this.ctx.db)
-        return Object.assign(comment, {
-          user_name: userInfo.user_name,
-          user_image: userInfo.user_image
-        })
-      })
-      resultData = createResultData({
-        message: '请求成功',
-        data: processComment,
-      })
-    } catch (err) {
-      resultData = createResultData({
-        noerr: 1,
-        message: err.message
-      })
-    }
-    this.ctx.body = resultData;
-  }
   @Get('/share')
   async share(@Params(['query']) params) {
     let resultData
@@ -235,7 +225,6 @@ export default class VideoController extends BaseController {
         message: err.message
       })
     }
-
     this.ctx.body = resultData
   }
 }

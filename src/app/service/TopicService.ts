@@ -44,9 +44,9 @@ export default class TopicService implements TopicInterface {
     try {
       let selectVoiceSentence;
       if (topicType === '全部') {
-        selectVoiceSentence = `select * from topic limit ${(page - 1) * count}, ${count} order by create_time desc`
+        selectVoiceSentence = `select * from topic order by create_time desc limit ${(page - 1) * count}, ${count} `
       } else {
-        selectVoiceSentence = `select * from topic where topic_type = ? limit ${(page - 1) * count} ${count} order by create_time desc`
+        selectVoiceSentence = `select * from topic where topic_type = ?  order by create_time desc limit ${(page - 1) * count} ${count} `
       }
       const [rows] = await db.query(selectVoiceSentence, [topicType])
       return rows

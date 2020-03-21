@@ -20,6 +20,7 @@ export default class FollowService implements followInterface {
       const [rows, fields] = await db.query(selectFollowSentence, [userid])
       return rows
     } catch (err) {
+      console.log(err)
       return false
     }
   }
