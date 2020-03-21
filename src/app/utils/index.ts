@@ -24,7 +24,13 @@ export const createIdentity = (num: number): string => {
   return identity
 }
 
-
+export const baseUrlToOOS = async (dir: string, dataurl) => {
+  var base64Data = dataurl.replace(/^data:image\/\w+;base64,/, '')
+  const imageBuffer = Buffer.from(base64Data, 'base64')
+  const now = Date.now()
+  const res = await client.put(`voice/${dir}/${now}.jpg`, imageBuffer)
+  return res.url
+}
 /**
  * 调阿里云oss
  */
