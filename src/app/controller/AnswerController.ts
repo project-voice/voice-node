@@ -29,6 +29,7 @@ export default class AnswerController extends BaseController {
           user_id: key
         })
       })
+      processAnswer.sort((a, b) => b.index - a.index)
       let ProcessAnswerResult = []
       for (let answer of processAnswer) {
         const userInfo = await this.userService.findUser('user_id', answer.user_id, this.ctx.db)

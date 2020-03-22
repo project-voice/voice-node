@@ -26,22 +26,31 @@ export default class StageController extends BaseController {
         const answerList = await this.answerService.getAnswerList(stageNum, this.ctx.db)
         const stageAnswerList = answerList.filter(answer => answer.user_id == userId)
         const answerUsersId = answerList.map(answer => answer.user_id)
-        const userLen = [...new Set(answerUsersId)].length
+        const userCount = [...new Set(answerUsersId)].length
         const questionLen = questionList.length
         const answerLen = stageAnswerList.length
-        const complete = (answerLen / questionLen).toFixed(2)
+        let complete: number;
+        if (questionLen === 0) {
+          complete = 1.00
+        } else {
+          complete = Number((answerLen / questionLen).toFixed(2))
+        }
         if (i === 0) {
           lock = false
         } else if (beforeStageComplete) {
           lock = false
         }
-        beforeStageComplete = questionLen === answerLen
+        beforeStageComplete = (questionLen === answerLen && questionLen !== 0)
         processStageList.push(Object.assign(stageList[i], {
           lock,
           complete,
-          userLen
+          userCount
         }))
       }
+      resultData = createResultData({
+        message: '获取成功',
+        data: processStageList
+      })
     } catch (err) {
       resultData = createResultData({
         noerr: 1,

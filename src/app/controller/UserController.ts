@@ -17,13 +17,14 @@ export default class UserController extends BaseController {
       let value: string = password
       if (platform === 'mobile') {
         key = email
+        const isUser = await this.userService.findUser('user_email', key, this.ctx.db)
+        if (!isUser) {
+          throw new Error('您输入的邮箱未注册')
+        }
       } else {
         key = username
       }
       const result = await this.userService.login(platform, key, value, this.ctx.db)
-      if (result === undefined && platform === 'mobile') {
-        throw new Error('您输入的邮箱未注册')
-      }
       if (!result) {
         throw new Error('登录失败')
       }
