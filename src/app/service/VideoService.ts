@@ -42,7 +42,7 @@ export default class VideService implements VideoInterface {
   }
   async videoToSelf(userId: number, db: any): Promise<any> {
     try {
-      const selectSentence = 'select * form video where user_id = ? order by create_time desc'
+      const selectSentence = 'select * from video where user_id = ? order by create_time desc'
       const [videos] = await db.query(selectSentence, [userId])
       return videos
     } catch (err) {

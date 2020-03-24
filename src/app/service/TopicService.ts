@@ -83,7 +83,7 @@ export default class TopicService implements TopicInterface {
   }
   async getTopicListToSelf(userId: number, db: any): Promise<any> {
     try {
-      const selectSentence = 'select * from topic where user_id = ?'
+      const selectSentence = 'select * from topic where user_id = ? order by create_time desc'
       const [rows] = await db.query(selectSentence, [userId])
       return rows
     } catch (err) {

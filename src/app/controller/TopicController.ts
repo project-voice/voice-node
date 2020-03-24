@@ -124,7 +124,7 @@ export default class TopicController extends BaseController {
     let resultData
     try {
       const { user_id: userId } = params
-      const result = await this.topicService.getTopicToSelf(userId, this.ctx.db)
+      const result = await this.topicService.getTopicListToSelf(userId, this.ctx.db)
       let processTopics = []
       for (let topic of result) {
         const userInfoPromise = this.userService.findUser('user_id', topic.user_id, this.ctx.db)
