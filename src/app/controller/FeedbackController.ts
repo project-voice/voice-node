@@ -1,5 +1,5 @@
 import { Controller, BaseController, Inject, Get, Params, Post } from 'kever';
-import { createResultData } from '../utils';
+import { createResultData, beforeTime } from '../utils';
 
 @Controller('/feedback')
 export default class FeedbackController extends BaseController {
@@ -9,16 +9,29 @@ export default class FeedbackController extends BaseController {
   public userService
 
   @Get('/get-feedback-list')
-  async getFeedbackList() {
+  async getFeedbackList(@Params(['query']) params) {
     let resultData
     try {
-      const result = await this.feedbackService.getFeedbackList(this.ctx.db)
+      const {page, count } = params
+      let result = await this.feedbackService.getFeedbackList(this.ctx.db)
       if (!result) {
         throw new Error('获取失败')
       }
+      result = result.slice((page - 1)* count, page * count)
+      const processFeedbackList = [];
+      for(let feedback of result) {
+        const userId = feedback.user_id;
+        const userInfo = await this.userService.findUser('user_id',userId,this.ctx.db)
+        const createTime = beforeTime(feedback.create_time)
+        processFeedbackList.push(Object.assign(feedback, {
+          user_name: userInfo.user_name,
+          create_time: createTime
+        }))
+
+      }
       resultData = createResultData({
         message: '获取成功',
-        data: result
+        data: processFeedbackList
       })
     } catch (err) {
       resultData = createResultData({

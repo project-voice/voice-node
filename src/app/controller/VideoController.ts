@@ -72,10 +72,12 @@ export default class VideoController extends BaseController {
     this.ctx.body = resultData
   }
   @Get('/video-list')
-  async getVieoList() {
+  async getVieoList(@Params(['query']) params) {
     let resultData
     try {
-      const result = await this.videoService.getVideoListRecommend(this.ctx.db)
+      const {page, count } = params;
+      let result = await this.videoService.getVideoListRecommend(this.ctx.db)
+      result = result.slice((page - 1)* count, page * count)
       let processResult = []
       for (let video of result) {
         const userInfoPromise = this.userService.findUser('user_id', video.user_id, this.ctx.db)

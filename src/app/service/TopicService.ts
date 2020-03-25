@@ -107,7 +107,7 @@ export default class TopicService implements TopicInterface {
       const isDisabled = await this.isDisabled(topicId, db)
       let value = 1
       if (isDisabled) {
-        value = 1
+        value = 0
       }
       const updateSentence = 'update topic set topic_status = ? where topic_id = ?'
       const [rows] = await db.query(updateSentence, [value, topicId])
