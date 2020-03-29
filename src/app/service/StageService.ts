@@ -38,7 +38,7 @@ export default class StageService implements StageInterface {
     try {
       const createTime = Date.now()
       let bannerUrl
-      if (stageInfo.bannerUrl.split(':')[0] === 'http') {
+      if (stageInfo.stageImage.split(':')[0] === 'http') {
         bannerUrl = stageInfo.stageImage
       } else {
         bannerUrl = await baseUrlToOOS('advisory', stageInfo.stageImage)
@@ -65,6 +65,7 @@ export default class StageService implements StageInterface {
       }
       return false
     } catch (err) {
+      console.log(err)
       return false
     }
   }

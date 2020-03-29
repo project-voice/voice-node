@@ -22,7 +22,7 @@ export default class QuestionService implements QuestionInterface {
     try {
       const bannerImage = await baseUrlToOOS('stage', questionInfo.questionImage)
       const createTime = Date.now();
-      const insertSentence = 'insert into question(stage_num,quetion_title,question_image,question_option,question_correct,create_time) values(?,?,?,?,?,?)'
+      const insertSentence = 'insert into question(stage_num,question_title,question_image,question_option,question_correct,create_time) values(?,?,?,?,?,?)'
       const [rows] = await db.query(insertSentence, [
         questionInfo.stageNum,
         questionInfo.questionTitle,
@@ -43,14 +43,14 @@ export default class QuestionService implements QuestionInterface {
     try {
       const createTime = Date.now()
       let bannerUrl
-      if (questionInfo.bannerUrl.split(':')[0] === 'http') {
+      if (questionInfo.questionImage.split(':')[0] === 'http') {
         bannerUrl = questionInfo.questionImage
       } else {
-        bannerUrl = await baseUrlToOOS('advisory', questionInfo.questionImage)
+        bannerUrl = await baseUrlToOOS('stage', questionInfo.questionImage)
       }
       const updateSentence = ` update question set
       stage_num=?,
-      quetion_title=?,
+      question_title=?,
       question_image=?,
       question_option=?,
       question_correct=?,
@@ -65,11 +65,13 @@ export default class QuestionService implements QuestionInterface {
         createTime,
         questionId,
       ])
+      console.log(rows)
       if (rows.affectedRows > 0) {
         return true
       }
       return false
     } catch (err) {
+      console.log(err)
       return false
     }
   }

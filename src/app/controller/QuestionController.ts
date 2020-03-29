@@ -89,7 +89,7 @@ export default class QuestionController extends BaseController {
       if (!isStaged) {
         throw new Error('该学习阶段不存在')
       }
-      const result = await this.questionService.createQuestion(
+      const result = await this.questionService.updateQuestionInfo(
         questionId,
         {
           stageNum,
@@ -105,6 +105,7 @@ export default class QuestionController extends BaseController {
         message: '更新成功'
       })
     } catch (err) {
+      console.log(err)
       resultData = createResultData({
         noerr: 1,
         message: err.message

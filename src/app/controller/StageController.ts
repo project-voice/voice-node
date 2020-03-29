@@ -94,10 +94,6 @@ export default class StageController extends BaseController {
     let resultData
     try {
       const { stage_id: stageId, stage_num: stageNum, stage_title: stageTitle, stage_image: stageImage, stage_description: stageDescription, stage_tag: stageTag } = params
-      const isStaged = await this.stageService.checkStage(stageNum, this.ctx.db)
-      if (isStaged) {
-        throw new Error('该学习阶段已存在')
-      }
       const result = await this.stageService.updateStage(stageId, {
         stageNum,
         stageTitle,
@@ -112,6 +108,7 @@ export default class StageController extends BaseController {
         message: '更新成功'
       })
     } catch (err) {
+      console.log(err)
       resultData = createResultData({
         noerr: 1,
         message: err.message
