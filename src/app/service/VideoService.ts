@@ -26,7 +26,6 @@ export default class VideService implements VideoInterface {
       followVideoList = followVideoList.reduce((result, follow) => result.concat(follow), [])
       return followVideoList
     } catch (err) {
-      console.log(err);
       return false
     }
   }

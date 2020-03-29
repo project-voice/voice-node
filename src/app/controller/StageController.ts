@@ -108,7 +108,6 @@ export default class StageController extends BaseController {
         message: '更新成功'
       })
     } catch (err) {
-      console.log(err)
       resultData = createResultData({
         noerr: 1,
         message: err.message

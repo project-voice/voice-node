@@ -65,13 +65,11 @@ export default class QuestionService implements QuestionInterface {
         createTime,
         questionId,
       ])
-      console.log(rows)
       if (rows.affectedRows > 0) {
         return true
       }
       return false
     } catch (err) {
-      console.log(err)
       return false
     }
   }

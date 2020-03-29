@@ -65,7 +65,6 @@ export default class StageService implements StageInterface {
       }
       return false
     } catch (err) {
-      console.log(err)
       return false
     }
   }

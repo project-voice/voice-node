@@ -13,10 +13,8 @@ export default class UserService implements UserInterface {
         selectSentence = 'select * from admins where user_name = ? and user_password = ?'
       }
       const [rows] = await db.query(selectSentence, [key, value])
-      console.log(rows, key, value);
       return rows[0]
     } catch (err) {
-      console.log(err)
       return false
     }
   }
@@ -55,7 +53,6 @@ export default class UserService implements UserInterface {
       }
       return false
     } catch (err) {
-      console.log(err);
       return false
     }
   }

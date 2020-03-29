@@ -15,7 +15,6 @@ export default class SupportService implements SupportInterface {
         action: checked
       }
     } catch (err) {
-      console.log(err)
       return false
     }
   }

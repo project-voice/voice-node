@@ -30,7 +30,6 @@ export default class CommentService implements CommentInterface {
       }
       return rows;
     } catch (err) {
-      console.log(err);
       return false
     }
   }

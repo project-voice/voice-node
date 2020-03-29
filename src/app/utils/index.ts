@@ -40,7 +40,6 @@ export const uploadOss = async (dir: string, files: Array<File>) => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i] as any;
       const { res } = await client.multipartUpload(`voice/${dir}/${file.name}`, file.path)
-      console.log(res)
       filesPath.push(res.requestUrls[0].split('?')[0])
     }
     return filesPath
@@ -58,11 +57,9 @@ export const beforeTime = (time: number) => {
     return `${diff}秒前`
   }
   diff = Math.floor(diff / 60);
-  // console.log(diff)
   if (diff < 60) {
     return `${diff}分钟前`
   }
-  // console.log(diff)
   diff = Math.floor(diff / 60);
   if (diff < 24) {
     return `${diff}小时前`
