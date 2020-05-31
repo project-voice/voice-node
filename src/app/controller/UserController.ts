@@ -1,50 +1,134 @@
-import { Controller, BaseController, Inject, Get, Post, Params } from 'kever'
-import { ResultData } from '../interface'
+import { Controller, BaseController, Get, Inject, Post, Params } from 'kever'
+import { createResultData } from '../utils'
 
 @Controller('/user')
 export default class UserController extends BaseController {
   @Inject('user')
-  private userService
-  @Inject('message')
-  private messageService
-  @Post('/register')
-  async register(@Params(['body']) params) {
-    const result = await this.userService.register(params, this.ctx.db)
-    this.ctx.body = result
-  }
+  public userService
+  @Inject('follow')
+  public followService
+
   @Post('/login')
   async login(@Params(['body']) params) {
-    const { user_password: password, user_email: email } = params
-    const result = await this.userService.login(email, password, this.ctx.db)
-    this.ctx.body = result
-  }
-  @Post('/update-info')
-  async updateInfo(@Params(['body']) params) {
-    let { user_id: userid, key, value } = params
-    if (key === 'user_image') {
-      const request = this.ctx.request as any;
-      value = request.files['value'];
+    let resultData
+    try {
+      const { user_email: email, user_password: password, platform, user_name: username } = params
+      let key: string
+      let value: string = password
+      if (platform === 'mobile') {
+        key = email
+        const isUser = await this.userService.findUser('user_email', key, this.ctx.db)
+        if (!isUser) {
+          throw new Error('您输入的邮箱未注册')
+        }
+      } else {
+        key = username
+      }
+      const result = await this.userService.login(platform, key, value, this.ctx.db)
+      if (!result) {
+        throw new Error('登录失败')
+      }
+      if (result.user_status == 1) {
+        throw new Error('该用户被禁用，请联系管理员处理相关信息。')
+      }
+      resultData = createResultData({
+        message: '登录成功',
+        data: result
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
     }
-    const result = await this.userService.updateInfo(userid, key, value, this.ctx.db)
-    this.ctx.body = result
+    this.ctx.body = resultData
   }
-  @Get('/follow')
-  async follow(@Params(['query']) params) {
-    const { user_id: userid, follow_id: followid } = params
-    const result = await this.userService.follow(userid, followid, this.ctx.db)
-    this.ctx.body = result
+  @Post('/register')
+  async register(@Params(['body']) params) {
+    let resultData
+    try {
+      const { user_email: email, user_name: username, user_password: password } = params
+      const result = await this.userService.createUser(email, username, password, this.ctx.db)
+      if (!result) {
+        throw new Error('注册失败')
+      }
+      // 自己关注自己
+      this.followService.follow(result, result, this.ctx.db)
+      resultData = createResultData({
+        message: '注册成功'
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
+    }
+    this.ctx.body = resultData
   }
-  @Get('/follow-list')
-  async getFollowList(@Params(['query']) params) {
-    const { user_id: userid } = params
-    let result: ResultData = await this.userService.getFollowList(userid, this.ctx.db)
-    result.data = (result.data as Array<any>).filter(user => user.user_id != userid)
-    this.ctx.body = result
+  @Post('/update')
+  async updateInfo(@Params(['body']) params) {
+    let resultData
+    try {
+      let { user_id: userId, key, value } = params
+      if (key === 'user_image') {
+        const request = this.ctx.request as any;
+        value = request.files['value'];
+      }
+      const result = await this.userService.updateUser(userId, key, value, this.ctx.db)
+      if (!result) {
+        throw new Error('更新失败')
+      }
+      resultData = createResultData({
+        message: '更新成功',
+        data: result
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
+    }
+    this.ctx.body = resultData
   }
-  @Get('/cancel-follow')
-  async cancelFollow(@Params(['query']) params) {
-    const { user_id: userid, follow_id: followid } = params
-    const result = await this.userService.cancelFollow(userid, followid, this.ctx.db)
-    this.ctx.body = result
+  @Get('/user-list')
+  async getUserList() {
+    let resultData
+    try {
+      const result = await this.userService.getUserList(this.ctx.db)
+      if (!result) {
+        throw new Error('请求失败')
+      }
+      resultData = createResultData({
+        message: '请求成功',
+        data: result
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
+    }
+    this.ctx.body = resultData
+  }
+  @Get('/disable-user')
+  async disableUser(@Params(['query']) params) {
+    let resultData
+    try {
+      const { user_id: userId } = params
+      const result = await this.userService.disableUser(userId, this.ctx.db)
+      if (!result) {
+        throw new Error('禁用失败')
+      }
+      resultData = createResultData({
+        message: '禁用成功',
+        data: result
+      })
+    } catch (err) {
+      resultData = createResultData({
+        noerr: 1,
+        message: err.message
+      })
+    }
+    this.ctx.body = resultData
   }
 }
