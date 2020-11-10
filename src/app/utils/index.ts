@@ -4,8 +4,8 @@ import { ResultData } from '../interface';
 
 const client = new OSS({
   region: 'oss-cn-beijing',
-  accessKeyId: 'LTAI4Fog6hpirGjSxsMgfBd5',
-  accessKeySecret: 'uKryPctQWPJQaCgdGF9F6SsSB4nsan',
+  accessKeyId: '',
+  accessKeySecret: '',
   bucket: 'kimvoice',
   timeout: 6000000
 })
